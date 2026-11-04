@@ -1,0 +1,312 @@
+{
+  "name": "daily-bread-statusbar",
+  "displayName": "Daily Bible — Offline & Scripture Status Bar",
+  "description": "100% Offline Holy Bible (isiZulu 1959, English WEB & KJV) with glanceable status bar scriptures, parallel dual-reader, bookmarks, and curated mood themes.",
+  "version": "1.0.0",
+  "publisher": "daily-bread",
+  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SitholeWB/daily-bible-extension.git"
+  },
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other",
+    "Education"
+  ],
+  "keywords": [
+    "bible",
+    "zulu",
+    "isizulu",
+    "scripture",
+    "status bar",
+    "offline",
+    "bhayibheli",
+    "kjv",
+    "web",
+    "faith"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "dailyBreadActivityBar",
+          "title": "Bible Explorer",
+          "icon": "media/bible.svg"
+        }
+      ]
+    },
+    "views": {
+      "dailyBreadActivityBar": [
+        {
+          "id": "dailyBreadExplorer",
+          "name": "Books & Chapters (Genesis — Revelation)",
+          "visibility": "visible"
+        },
+        {
+          "id": "dailyBreadBookmarks",
+          "name": "My Bookmarks & Favorites",
+          "visibility": "visible"
+        },
+        {
+          "id": "dailyBreadTopics",
+          "name": "Curated Topics & Moods",
+          "visibility": "visible"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "dailyBread.nextVerse",
+        "title": "Daily Bible: Next Rotating Verse",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "dailyBread.menu",
+        "title": "Daily Bible: Open Scripture Quick Action Menu",
+        "icon": "$(book)"
+      },
+      {
+        "command": "dailyBread.readChapter",
+        "title": "Daily Bible: Read Full Chapter in In-Editor Reader",
+        "icon": "$(book)"
+      },
+      {
+        "command": "dailyBread.openReader",
+        "title": "Daily Bible: Open Bible Reader",
+        "icon": "$(book)"
+      },
+      {
+        "command": "dailyBread.bookmarkCurrent",
+        "title": "Daily Bible: Bookmark Current Verse",
+        "icon": "$(star-full)"
+      },
+      {
+        "command": "dailyBread.removeCurrentBookmark",
+        "title": "Daily Bible: Remove Current Bookmark",
+        "icon": "$(star-empty)"
+      },
+      {
+        "command": "dailyBread.showBookmarks",
+        "title": "Daily Bible: View Saved Bookmarks",
+        "icon": "$(bookmark)"
+      },
+      {
+        "command": "dailyBread.selectTopic",
+        "title": "Daily Bible: Select Topic / Mood Filter",
+        "icon": "$(tag)"
+      },
+      {
+        "command": "dailyBread.switchTranslation",
+        "title": "Daily Bible: Switch Translation (isiZulu / WEB / KJV)",
+        "icon": "$(globe)"
+      },
+      {
+        "command": "dailyBread.jumpTo",
+        "title": "Daily Bible: Search & Jump to Scripture Reference",
+        "icon": "$(search)"
+      },
+      {
+        "command": "dailyBread.showCrossReferences",
+        "title": "Daily Bible: View Verse Cross-References",
+        "icon": "$(link)"
+      },
+      {
+        "command": "dailyBread.jumpToRef",
+        "title": "Daily Bible: Jump to Reference",
+        "icon": "$(link)"
+      },
+      {
+        "command": "dailyBread.randomChapter",
+        "title": "Daily Bible: Open Random Chapter",
+        "icon": "$(dice)"
+      },
+      {
+        "command": "dailyBread.copyVerse",
+        "title": "Daily Bible: Copy Current Verse to Clipboard",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "dailyBread.exportBookmarks",
+        "title": "Daily Bible: Export Bookmarks (Markdown / JSON)",
+        "icon": "$(export)"
+      },
+      {
+        "command": "dailyBread.deleteBookmarkItem",
+        "title": "Remove Bookmark",
+        "icon": "$(trash)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "dailyBread.nextVerse",
+        "key": "ctrl+alt+b",
+        "mac": "cmd+alt+b"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "dailyBread.exportBookmarks",
+          "when": "view == dailyBreadBookmarks",
+          "group": "navigation"
+        },
+        {
+          "command": "dailyBread.jumpTo",
+          "when": "view == dailyBreadExplorer",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "dailyBread.deleteBookmarkItem",
+          "when": "view == dailyBreadBookmarks && viewItem == bookmarkItem",
+          "group": "inline"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Daily Bible",
+      "properties": {
+        "dailyBread.translation": {
+          "type": "string",
+          "default": "kjv",
+          "enum": [
+            "kjv",
+            "web",
+            "zulu"
+          ],
+          "enumDescriptions": [
+            "English — King James Version / Bible (KJV / KJB - classic traditional poetic English)",
+            "English — World English Bible (Clean modern public domain English)",
+            "isiZulu — IBhayibheli Elingcwele (1959 Translation)"
+          ],
+          "description": "Primary Bible translation to display in the status bar and reader (Default: English KJB)."
+        },
+        "dailyBread.dualTranslation": {
+          "type": "string",
+          "default": "none",
+          "enum": [
+            "none",
+            "zulu",
+            "web",
+            "kjv"
+          ],
+          "enumDescriptions": [
+            "Disabled (single translation)",
+            "Show isiZulu translation alongside primary in hover tooltip & parallel reader",
+            "Show WEB translation alongside primary in hover tooltip & parallel reader",
+            "Show KJV translation alongside primary in hover tooltip & parallel reader"
+          ],
+          "description": "Secondary parallel translation for dual side-by-side reading."
+        },
+        "dailyBread.displayMode": {
+          "type": "string",
+          "default": "preview",
+          "enum": [
+            "compact",
+            "preview",
+            "full"
+          ],
+          "enumDescriptions": [
+            "Reference only (e.g. ✝ AmaHubo 23:1 or ✝ Psalm 23:1)",
+            "Reference and quote preview (e.g. ✝ Phil 4:13 — \"Nginamandla...\")",
+            "Full complete verse text"
+          ],
+          "description": "Status bar display formatting mode."
+        },
+        "dailyBread.icon": {
+          "type": "string",
+          "default": "cross",
+          "enum": [
+            "cross",
+            "book",
+            "dove",
+            "none"
+          ],
+          "enumDescriptions": [
+            "Latin Cross (✝)",
+            "Open Book (📖)",
+            "Peace Dove (🕊️)",
+            "No icon"
+          ],
+          "description": "Icon symbol prefix in the status bar."
+        },
+        "dailyBread.rotationSchedule": {
+          "type": "string",
+          "default": "15min",
+          "enum": [
+            "manual",
+            "5min",
+            "15min",
+            "30min",
+            "60min",
+            "onEditorOpen"
+          ],
+          "enumDescriptions": [
+            "Manual only (change via shortcut Ctrl+Alt+B or menu)",
+            "Rotate every 5 minutes",
+            "Rotate every 15 minutes (recommended)",
+            "Rotate every 30 minutes",
+            "Rotate every 60 minutes",
+            "Rotate every time an active editor tab is opened"
+          ],
+          "description": "Schedule frequency for rotating status bar scripture."
+        },
+        "dailyBread.rotateOnFileSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "When enabled, automatically rotates to a fresh encouraging verse whenever you save a file."
+        },
+        "dailyBread.topic": {
+          "type": "string",
+          "default": "all",
+          "enum": [
+            "all",
+            "peace",
+            "wisdom",
+            "strength",
+            "comfort",
+            "gratitude",
+            "joy"
+          ],
+          "enumDescriptions": [
+            "All Scripture — cycles through all curated themes and scriptures",
+            "Peace & Rest (Ukuthula Nokuphumula) — calm and anxiety relief",
+            "Focus & Wisdom (Ukuhlakanipha Nokugxila) — clarity while coding",
+            "Strength & Courage (Amandla Nesibindi) — stamina and perseverance",
+            "Hard Times & Comfort (Izikhathi Ezinzima Nenduduzo) — solace in struggle",
+            "Gratitude & Praise (Ukubonga Nokudumisa) — thanksgiving and joy",
+            "Joy & Hope (Injabulo Nethemba) — uplifting encouragement"
+          ],
+          "description": "Active scripture topic/mood filter for status bar rotation."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build-prod",
+    "compile": "tsc -p ./",
+    "watch": "node esbuild.js --watch",
+    "build": "node esbuild.js",
+    "build-prod": "node esbuild.js --production",
+    "test": "tsc && mocha --require ./test/mockVscode.js 'out/test/suite/**/*.test.js'",
+    "package": "vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.75.0",
+    "@vscode/vsce": "^3.2.1",
+    "esbuild": "^0.24.2",
+    "mocha": "^10.8.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}
