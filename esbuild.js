@@ -8,6 +8,7 @@ async function main() {
     entryPoints: ['src/extension.ts'],
     bundle: true,
     format: 'cjs',
+    target: ['node16', 'es2020'],
     minify: production,
     sourcemap: !production,
     sourcesContent: false,
