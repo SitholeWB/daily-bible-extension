@@ -3,14 +3,14 @@
   "displayName": "Daily Bible — Offline & Scripture Status Bar",
   "description": "100% Offline Holy Bible (isiZulu 1959, English WEB & KJV) with glanceable status bar scriptures, parallel dual-reader, bookmarks, and curated mood themes.",
   "version": "1.0.0",
-  "publisher": "daily-bread",
+  "publisher": "sitholewb",
   "icon": "media/icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/SitholeWB/daily-bible-extension.git"
   },
   "engines": {
-    "vscode": "^1.65.0"
+    "vscode": "^1.75.0"
   },
   "categories": [
     "Other",
