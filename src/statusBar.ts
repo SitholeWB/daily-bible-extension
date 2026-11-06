@@ -93,6 +93,7 @@ export class StatusBarController {
       `[$(book) Read In Editor](command:dailyBread.readChapter "Open full in-editor reader tab") &nbsp;&bull;&nbsp; ` +
       `[🔗 Cross Refs Directory](command:dailyBread.showCrossReferences "View full cross-reference list") &nbsp;&bull;&nbsp; ` +
       `[${bookmarkLabel}](${bookmarkCmd} "Save to favorites") &nbsp;&bull;&nbsp; ` +
+      `[$(text-size) Font Size](command:dailyBread.changeFontSize "Adjust scripture font size") &nbsp;&bull;&nbsp; ` +
       `[$(copy) Copy](command:dailyBread.copyVerse "Copy verse to clipboard") &nbsp;&bull;&nbsp; ` +
       `[$(globe) Switch Translation](command:dailyBread.switchTranslation "Change Bible translation") &nbsp;&bull;&nbsp; ` +
       `[$(search) Search / Jump](command:dailyBread.jumpTo "Search any scripture")\n\n`
@@ -186,6 +187,7 @@ export class StatusBarController {
       `[$(book) Read In Editor](command:dailyBread.readChapter "Open full in-editor reader tab") &nbsp;&bull;&nbsp; ` +
       `[🔗 Cross Refs Directory](command:dailyBread.showCrossReferences "View full cross-reference list") &nbsp;&bull;&nbsp; ` +
       `[${bookmarkLabel}](${bookmarkCmd} "Save to favorites") &nbsp;&bull;&nbsp; ` +
+      `[$(text-size) Font Size](command:dailyBread.changeFontSize "Adjust scripture font size") &nbsp;&bull;&nbsp; ` +
       `[$(copy) Copy Verse](command:dailyBread.copyVerse "Copy verse to clipboard") &nbsp;&bull;&nbsp; ` +
       `[$(globe) Switch Translation](command:dailyBread.switchTranslation "Change Bible translation") &nbsp;&bull;&nbsp; ` +
       `[$(search) Search / Jump](command:dailyBread.jumpTo "Search any scripture")\n`

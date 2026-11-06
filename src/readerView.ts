@@ -4,7 +4,11 @@ import { BookmarksManager } from './bookmarks';
 import { BookMetadata, Translation } from './types';
 
 export class BibleReaderView {
-  private static currentPanel: BibleReaderView | undefined;
+  public static currentPanel: BibleReaderView | undefined;
+
+  public static updateCurrent(): void {
+    BibleReaderView.currentPanel?.update();
+  }
   private readonly panel: vscode.WebviewPanel;
   private readonly extensionUri: vscode.Uri;
   private readonly bibleManager: BibleManager;
@@ -122,6 +126,26 @@ export class BibleReaderView {
                 vscode.window.showInformationMessage(`Could not resolve cross-reference: ${message.ref}`);
               }
             }
+            break;
+          }
+          case 'adjustFontSize': {
+            const config = vscode.workspace.getConfiguration('dailyBread');
+            const current = config.get<number>('fontSize', 0);
+            const editorSize = vscode.workspace.getConfiguration('editor').get<number>('fontSize', 14);
+            const base = current === 0 ? editorSize : current;
+            const next = Math.max(10, Math.min(36, base + message.delta));
+            await config.update('fontSize', next, vscode.ConfigurationTarget.Global);
+            this.update();
+            break;
+          }
+          case 'setFontSize': {
+            const config = vscode.workspace.getConfiguration('dailyBread');
+            await config.update('fontSize', message.size, vscode.ConfigurationTarget.Global);
+            this.update();
+            break;
+          }
+          case 'promptFontSize': {
+            await vscode.commands.executeCommand('dailyBread.changeFontSize');
             break;
           }
         }
@@ -348,6 +372,28 @@ export class BibleReaderView {
       }
     }
 
+    const dailyBreadConfig = vscode.workspace.getConfiguration('dailyBread');
+    const configuredFontSize = dailyBreadConfig.get<number>('fontSize', 0);
+    const configuredFontFamily = dailyBreadConfig.get<string>('fontFamily', 'editor');
+
+    const editorConfig = vscode.workspace.getConfiguration('editor');
+    const editorFontSize = editorConfig.get<number>('fontSize', 14);
+    const editorFontFamily = editorConfig.get<string>('fontFamily', '');
+
+    let resolvedFontFamily = 'var(--vscode-editor-font-family, monospace)';
+    if (configuredFontFamily === 'serif') {
+      resolvedFontFamily = 'Georgia, Garamond, "Times New Roman", serif';
+    } else if (configuredFontFamily === 'sans-serif') {
+      resolvedFontFamily = 'var(--vscode-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif)';
+    } else if (configuredFontFamily === 'monospace') {
+      resolvedFontFamily = 'var(--vscode-editor-font-family, Consolas, "Courier New", monospace)';
+    } else if (configuredFontFamily === 'system') {
+      resolvedFontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    }
+
+    const fontSizeDisplay = configuredFontSize === 0 ? `Editor (${editorFontSize}px)` : `${configuredFontSize}px`;
+    const cssFontSize = configuredFontSize === 0 ? `var(--vscode-editor-font-size, ${editorFontSize}px)` : `${configuredFontSize}px`;
+
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -358,7 +404,8 @@ export class BibleReaderView {
     :root {
       --bg: var(--vscode-editor-background);
       --fg: var(--vscode-editor-foreground);
-      --font-family: var(--vscode-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Georgia, serif);
+      --font-family: ${resolvedFontFamily};
+      --reader-font-size: ${cssFontSize};
       --accent: var(--vscode-textLink-foreground, #3794ff);
       --card-bg: var(--vscode-editorWidget-background, rgba(128, 128, 128, 0.08));
       --border: var(--vscode-editorWidget-border, rgba(128, 128, 128, 0.2));
@@ -372,10 +419,10 @@ export class BibleReaderView {
       background-color: var(--bg);
       color: var(--fg);
       font-family: var(--font-family);
+      font-size: var(--reader-font-size);
       margin: 0;
       padding: 0;
       line-height: 1.7;
-      font-size: 15px;
     }
 
     .header-bar {
@@ -681,6 +728,55 @@ export class BibleReaderView {
       padding-top: 20px;
       border-top: 1px solid var(--border);
     }
+
+    .font-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 3px;
+    }
+
+    .font-btn {
+      border: none !important;
+      background: transparent !important;
+      padding: 3px 6px !important;
+      font-size: 11px !important;
+      font-weight: 600;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .font-btn:hover {
+      background: var(--hover-bg) !important;
+      color: var(--accent);
+    }
+
+    .font-btn.btn-active {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .font-pill {
+      border: none !important;
+      background: transparent !important;
+      padding: 3px 7px !important;
+      font-size: 11px !important;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-left: 1px solid var(--border) !important;
+      border-right: 1px solid var(--border) !important;
+      border-radius: 0 !important;
+      cursor: pointer;
+    }
+
+    .font-pill:hover {
+      background: var(--hover-bg) !important;
+      color: var(--accent);
+    }
   </style>
 </head>
 <body>
@@ -712,6 +808,16 @@ export class BibleReaderView {
           <option value="kjv" ${this.parallelTranslation === 'kjv' ? 'selected' : ''}>Parallel: KJB</option>
         </select>
       ` : ''}
+
+      <div class="font-controls" title="Scripture Font Size">
+        <button class="btn font-btn" onclick="adjustFontSize(-1)" title="Decrease font size (A-)">A−</button>
+        <button class="btn font-pill" onclick="promptFontSize()" title="Click to choose or customize font size">
+          <span style="font-weight:700;">Aa</span>
+          <span id="font-size-label">${fontSizeDisplay}</span>
+        </button>
+        <button class="btn font-btn" onclick="adjustFontSize(1)" title="Increase font size (A+)">A+</button>
+        <button class="btn font-btn ${configuredFontSize === 0 ? 'btn-active' : ''}" onclick="resetFontSize()" title="Match VS Code Editor Font Size">Auto</button>
+      </div>
     </div>
   </div>
 
@@ -787,6 +893,18 @@ export class BibleReaderView {
 
     function jumpRef(ref) {
       vscode.postMessage({ command: 'jumpToReference', ref: ref });
+    }
+
+    function adjustFontSize(delta) {
+      vscode.postMessage({ command: 'adjustFontSize', delta: delta });
+    }
+
+    function resetFontSize() {
+      vscode.postMessage({ command: 'setFontSize', size: 0 });
+    }
+
+    function promptFontSize() {
+      vscode.postMessage({ command: 'promptFontSize' });
     }
 
     // Auto-scroll to target verse if specified

@@ -81,4 +81,6 @@ export interface ExtensionSettings {
   rotateOnFileSave: boolean;
   topic: string; // 'all' or topic id
   dualTranslation: Translation | 'none';
+  fontSize: number; // 0 = match editor font size
+  fontFamily: string; // 'editor' | 'serif' | 'sans-serif' | 'monospace' | 'system'
 }

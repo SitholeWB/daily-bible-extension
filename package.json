@@ -2,7 +2,7 @@
   "name": "daily-bread-statusbar",
   "displayName": "Daily Bible — Offline & Scripture Status Bar",
   "description": "100% Offline Holy Bible (isiZulu 1959, English WEB & KJV) with glanceable status bar scriptures, parallel dual-reader, bookmarks, and curated mood themes.",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "publisher": "sitholewb",
   "icon": "media/icon.png",
   "repository": {
@@ -141,6 +141,16 @@
         "command": "dailyBread.deleteBookmarkItem",
         "title": "Remove Bookmark",
         "icon": "$(trash)"
+      },
+      {
+        "command": "dailyBread.changeFontSize",
+        "title": "Daily Bible: Change Reader Font Size",
+        "icon": "$(text-size)"
+      },
+      {
+        "command": "dailyBread.changeFontFamily",
+        "title": "Daily Bible: Change Reader Font Family",
+        "icon": "$(symbol-text)"
       }
     ],
     "keybindings": [
@@ -286,6 +296,32 @@
             "Joy & Hope (Injabulo Nethemba) — uplifting encouragement"
           ],
           "description": "Active scripture topic/mood filter for status bar rotation."
+        },
+        "dailyBread.fontSize": {
+          "type": "integer",
+          "default": 0,
+          "minimum": 0,
+          "maximum": 48,
+          "description": "Scripture font size in pixels (Reader View & Reading tabs). Set to 0 to automatically match your active VS Code editor font size (editor.fontSize)."
+        },
+        "dailyBread.fontFamily": {
+          "type": "string",
+          "default": "editor",
+          "enum": [
+            "editor",
+            "serif",
+            "sans-serif",
+            "monospace",
+            "system"
+          ],
+          "enumDescriptions": [
+            "Match your active VS Code editor font family (editor.fontFamily)",
+            "Book serif (Georgia, Garamond, Palatino, serif)",
+            "Modern clean sans-serif (Segoe UI, -apple-system, Roboto, sans-serif)",
+            "Monospace code font (Consolas, monospace)",
+            "System UI font (-apple-system, BlinkMacSystemFont, Segoe UI)"
+          ],
+          "description": "Font family for the Bible Reader. Default: Match active VS Code editor font."
         }
       }
     }

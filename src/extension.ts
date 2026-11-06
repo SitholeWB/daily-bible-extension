@@ -38,7 +38,9 @@ export function activate(context: vscode.ExtensionContext) {
       rotationSchedule: config.get<RotationSchedule>('rotationSchedule', '15min'),
       rotateOnFileSave: config.get<boolean>('rotateOnFileSave', false),
       topic: config.get<string>('topic', 'all'),
-      dualTranslation: config.get<Translation | 'none'>('dualTranslation', 'none')
+      dualTranslation: config.get<Translation | 'none'>('dualTranslation', 'none'),
+      fontSize: config.get<number>('fontSize', 0),
+      fontFamily: config.get<string>('fontFamily', 'editor')
     };
   };
 
@@ -125,8 +127,13 @@ export function activate(context: vscode.ExtensionContext) {
   // Listen for config changes
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration(e => {
-      if (e.affectsConfiguration('dailyBread')) {
+      if (
+        e.affectsConfiguration('dailyBread') ||
+        e.affectsConfiguration('editor.fontSize') ||
+        e.affectsConfiguration('editor.fontFamily')
+      ) {
         setupRotation();
+        BibleReaderView.updateCurrent();
         const settings = getSettings();
         if (currentVerse) {
           const dual = settings.dualTranslation !== 'none' ? settings.dualTranslation : undefined;
@@ -576,6 +583,16 @@ export function activate(context: vscode.ExtensionContext) {
           detail: 'Filter status bar by Peace, Focus, Strength, Joy, Gratitude, or Comfort'
         },
         {
+          label: '$(text-size) Change Font Size',
+          description: getSettings().fontSize === 0 ? `Auto / Match Editor (${vscode.workspace.getConfiguration('editor').get<number>('fontSize', 14)}px)` : `${getSettings().fontSize}px`,
+          detail: 'Adjust scripture text size or sync automatically with VS Code editor font'
+        },
+        {
+          label: '$(symbol-text) Change Font Family',
+          description: `Current: ${getSettings().fontFamily}`,
+          detail: 'Switch between Editor font, Book Serif, Clean Sans-Serif, or Monospace'
+        },
+        {
           label: '$(globe) Switch Translation',
           description: `Current: ${getSettings().translation.toUpperCase()}`,
           detail: 'Toggle between isiZulu 1959, English WEB, and English KJV'
@@ -622,6 +639,10 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.executeCommand('dailyBread.showBookmarks');
       } else if (selected.label.includes('Select Topic')) {
         vscode.commands.executeCommand('dailyBread.selectTopic');
+      } else if (selected.label.includes('Change Font Size')) {
+        vscode.commands.executeCommand('dailyBread.changeFontSize');
+      } else if (selected.label.includes('Change Font Family')) {
+        vscode.commands.executeCommand('dailyBread.changeFontFamily');
       } else if (selected.label.includes('Switch Translation')) {
         vscode.commands.executeCommand('dailyBread.switchTranslation');
       } else if (selected.label.includes('Search & Jump')) {
@@ -633,6 +654,108 @@ export function activate(context: vscode.ExtensionContext) {
       } else if (selected.label.includes('Configure Extension Settings')) {
         vscode.commands.executeCommand('workbench.action.openSettings', 'dailyBread');
       }
+    })
+  );
+
+  // 16. Change Font Size Command
+  context.subscriptions.push(
+    vscode.commands.registerCommand('dailyBread.changeFontSize', async () => {
+      const editorSize = vscode.workspace.getConfiguration('editor').get<number>('fontSize', 14);
+      const currentSize = vscode.workspace.getConfiguration('dailyBread').get<number>('fontSize', 0);
+
+      const items = [
+        {
+          label: `$(sync) Auto — Match Editor Font (${editorSize}px)`,
+          description: currentSize === 0 ? 'Currently Active' : 'Automatically syncs with editor.fontSize',
+          size: 0
+        },
+        { label: '$(text-size) Small (12px)', description: currentSize === 12 ? 'Active' : '', size: 12 },
+        { label: '$(text-size) Compact (14px)', description: currentSize === 14 ? 'Active' : '', size: 14 },
+        { label: '$(text-size) Medium (16px)', description: currentSize === 16 ? 'Active' : '', size: 16 },
+        { label: '$(text-size) Large (18px)', description: currentSize === 18 ? 'Active' : '', size: 18 },
+        { label: '$(text-size) Extra Large (22px)', description: currentSize === 22 ? 'Active' : '', size: 22 },
+        { label: '$(text-size) Huge (26px)', description: currentSize === 26 ? 'Active' : '', size: 26 },
+        { label: '$(edit) Custom Size...', description: 'Type an exact pixel size', size: -1 }
+      ];
+
+      const picked = await vscode.window.showQuickPick(items, {
+        placeHolder: `Select scripture font size (Current: ${currentSize === 0 ? `Auto / Match Editor (${editorSize}px)` : `${currentSize}px`})`
+      });
+
+      if (!picked) return;
+
+      if (picked.size === -1) {
+        const input = await vscode.window.showInputBox({
+          prompt: 'Enter scripture font size in pixels (10 - 48, or 0 for Auto / Match Editor)',
+          value: currentSize === 0 ? editorSize.toString() : currentSize.toString(),
+          validateInput: val => {
+            const n = parseInt(val, 10);
+            return isNaN(n) || n < 0 || n > 48 ? 'Please enter a number between 10 and 48 (or 0 for Auto)' : null;
+          }
+        });
+        if (input !== undefined) {
+          const val = parseInt(input, 10);
+          await vscode.workspace.getConfiguration('dailyBread').update('fontSize', val, vscode.ConfigurationTarget.Global);
+          vscode.window.showInformationMessage(
+            `Daily Bible font size set to ${val === 0 ? `Auto / Match Editor (${editorSize}px)` : `${val}px`}`
+          );
+        }
+      } else {
+        await vscode.workspace.getConfiguration('dailyBread').update('fontSize', picked.size, vscode.ConfigurationTarget.Global);
+        vscode.window.showInformationMessage(
+          `Daily Bible font size set to ${picked.size === 0 ? `Auto / Match Editor (${editorSize}px)` : `${picked.size}px`}`
+        );
+      }
+    })
+  );
+
+  // 17. Change Font Family Command
+  context.subscriptions.push(
+    vscode.commands.registerCommand('dailyBread.changeFontFamily', async () => {
+      const editorFont = vscode.workspace.getConfiguration('editor').get<string>('fontFamily', 'monospace');
+      const currentFamily = vscode.workspace.getConfiguration('dailyBread').get<string>('fontFamily', 'editor');
+
+      const items = [
+        {
+          label: '$(editor) Match Editor Font',
+          description: currentFamily === 'editor' ? 'Currently Active' : editorFont,
+          detail: 'Syncs automatically with your active VS Code code editor font',
+          family: 'editor'
+        },
+        {
+          label: '$(book) Book Serif',
+          description: currentFamily === 'serif' ? 'Currently Active' : 'Georgia, Garamond, Times New Roman, serif',
+          detail: 'Classic, warm editorial book typesetting',
+          family: 'serif'
+        },
+        {
+          label: '$(symbol-text) Clean Sans-Serif',
+          description: currentFamily === 'sans-serif' ? 'Currently Active' : 'Segoe UI, -apple-system, Roboto, sans-serif',
+          detail: 'Modern crisp user interface typography',
+          family: 'sans-serif'
+        },
+        {
+          label: '$(terminal) Monospace Code Font',
+          description: currentFamily === 'monospace' ? 'Currently Active' : 'Consolas, Courier New, monospace',
+          detail: 'Fixed-width developer aesthetic',
+          family: 'monospace'
+        },
+        {
+          label: '$(device-desktop) System Default',
+          description: currentFamily === 'system' ? 'Currently Active' : 'Operating system native font',
+          detail: 'Native OS font rendering',
+          family: 'system'
+        }
+      ];
+
+      const picked = await vscode.window.showQuickPick(items, {
+        placeHolder: `Select Bible reader font family (Current: ${currentFamily})`
+      });
+
+      if (!picked) return;
+
+      await vscode.workspace.getConfiguration('dailyBread').update('fontFamily', picked.family, vscode.ConfigurationTarget.Global);
+      vscode.window.showInformationMessage(`Daily Bible font family set to: ${picked.label.replace(/\$\([^)]+\)\s*/, '')}`);
     })
   );
 
