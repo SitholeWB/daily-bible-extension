@@ -161,6 +161,8 @@
     "aliases": [
       "1ki",
       "1kin",
+      "1 kgs",
+      "1kgs",
       "1 kings",
       "1kings",
       "1 amakhosi",
@@ -178,6 +180,8 @@
     "aliases": [
       "2ki",
       "2kin",
+      "2 kgs",
+      "2kgs",
       "2 kings",
       "2kings",
       "2 amakhosi",
@@ -853,6 +857,7 @@
     "testament": "NT",
     "aliases": [
       "phm",
+      "phlm",
       "philem",
       "philemon",
       "kufilemoni",

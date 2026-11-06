@@ -21,6 +21,18 @@ export interface CrossReferenceGroup {
   refs: string[];
 }
 
+export interface ResolvedCrossReference {
+  ref: string;
+  bookId: number;
+  bookName: string;
+  zuluBookName: string;
+  chapter: number;
+  verse: number;
+  endVerse?: number;
+  text: string;
+  anchor: string;
+}
+
 export interface VerseData {
   bookId: number;
   bookName: string;
@@ -32,6 +44,8 @@ export interface VerseData {
   parallelText?: string;
   parallelTranslation?: Translation;
   crossReferences?: CrossReferenceGroup[];
+  resolvedCrossReferences?: ResolvedCrossReference[];
+  chapterVerses?: string[];
 }
 
 export interface Bookmark {

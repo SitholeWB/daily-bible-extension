@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { BookMetadata, CrossReferenceGroup, CuratedTopic, Translation, VerseData, VerseRef } from './types';
+import { BookMetadata, CrossReferenceGroup, CuratedTopic, ResolvedCrossReference, Translation, VerseData, VerseRef } from './types';
 
 export class BibleManager {
   private dataDir: string;
@@ -147,27 +147,29 @@ export class BibleManager {
    * Parse reference input such as:
    * "John 3:16", "Joh 3:16", "AmaHubo 23:1", "Hubo 23:1", "Phil 4:13", "Gen 1", "USenesisi 1:1"
    */
-  public parseReference(input: string): { book: BookMetadata; chapter: number; verse?: number } | undefined {
+  public parseReference(input: string): { book: BookMetadata; chapter: number; verse?: number; endVerse?: number } | undefined {
     const cleaned = input.trim();
     if (!cleaned) return undefined;
 
-    // Match patterns like "1 John 3:16", "John 3:16", "Psalm 23", "AmaHubo 23:1"
-    const match = cleaned.match(/^([1-3]?\s*[A-Za-z\-]+)\s*(\d+)(?:[:.\s](\d+))?$/);
+    // Match patterns like "1 John 4:9-10", "John 1:14,18", "John 3:16", "Psalm 23", "AmaHubo 23:1"
+    const match = cleaned.match(/^([1-3]?\s*[A-Za-z\-]+)\s*(\d+)(?:[:.\s](\d+)(?:[-–](\d+))?)?/);
     if (!match) {
       // Fallback: match without verse or with looser spacing
-      const fallbackMatch = cleaned.match(/^([1-3]?\s*[\p{L}\-]+)\s*(\d+)(?:[:.\s](\d+))?$/u);
+      const fallbackMatch = cleaned.match(/^([1-3]?\s*[\p{L}\-]+)\s*(\d+)(?:[:.\s](\d+)(?:[-–](\d+))?)?/u);
       if (!fallbackMatch) return undefined;
       const bookStr = fallbackMatch[1].trim();
       const ch = parseInt(fallbackMatch[2], 10);
       const v = fallbackMatch[3] ? parseInt(fallbackMatch[3], 10) : undefined;
+      const ev = fallbackMatch[4] ? parseInt(fallbackMatch[4], 10) : undefined;
       const book = this.findBook(bookStr);
       if (!book) return undefined;
-      return { book, chapter: ch, verse: v };
+      return { book, chapter: ch, verse: v, endVerse: ev };
     }
 
     const bookStr = match[1].trim();
     const chapter = parseInt(match[2], 10);
     const verse = match[3] ? parseInt(match[3], 10) : undefined;
+    const endVerse = match[4] ? parseInt(match[4], 10) : undefined;
 
     const book = this.findBook(bookStr);
     if (!book) return undefined;
@@ -177,7 +179,87 @@ export class BibleManager {
       return undefined;
     }
 
-    return { book, chapter, verse };
+    return { book, chapter, verse, endVerse };
+  }
+
+  public getVerseRange(
+    bookId: number,
+    chapter: number,
+    startVerse: number,
+    endVerse?: number,
+    translation: Translation = 'kjv'
+  ): string {
+    const verses = this.getChapter(bookId, chapter, translation);
+    if (verses.length === 0 || startVerse < 1 || startVerse > verses.length) {
+      return '';
+    }
+
+    if (!endVerse || endVerse <= startVerse) {
+      return verses[startVerse - 1] || '';
+    }
+
+    const limit = Math.min(endVerse, verses.length, startVerse + 2);
+    const parts: string[] = [];
+    for (let v = startVerse; v <= limit; v++) {
+      const t = verses[v - 1];
+      if (t) {
+        parts.push(`[${v}] ${t}`);
+      }
+    }
+    if (endVerse > limit) {
+      parts.push('...');
+    }
+    return parts.join(' ');
+  }
+
+  public resolveCrossReferences(
+    bookId: number,
+    chapter: number,
+    verse: number,
+    translation: Translation = 'kjv',
+    maxCount: number = 8
+  ): ResolvedCrossReference[] {
+    const groups = this.getCrossReferences(bookId, chapter, verse);
+    const results: ResolvedCrossReference[] = [];
+    const seenRefs = new Set<string>();
+
+    for (const group of groups) {
+      for (const ref of group.refs) {
+        if (seenRefs.has(ref)) continue;
+        seenRefs.add(ref);
+
+        const parsed = this.parseReference(ref);
+        if (parsed && parsed.verse) {
+          const text = this.getVerseRange(
+            parsed.book.id,
+            parsed.chapter,
+            parsed.verse,
+            parsed.endVerse,
+            translation
+          );
+
+          if (text) {
+            results.push({
+              ref,
+              bookId: parsed.book.id,
+              bookName: parsed.book.name,
+              zuluBookName: parsed.book.zuluName,
+              chapter: parsed.chapter,
+              verse: parsed.verse,
+              endVerse: parsed.endVerse,
+              text,
+              anchor: group.anchor
+            });
+          }
+        }
+
+        if (results.length >= maxCount) {
+          return results;
+        }
+      }
+    }
+
+    return results;
   }
 
   public loadBookChapters(bookId: number, translation: Translation): string[][] {
@@ -269,6 +351,7 @@ export class BibleManager {
     }
 
     const crossReferences = this.getCrossReferences(bookId, chapter, verse);
+    const resolvedCrossReferences = this.resolveCrossReferences(bookId, chapter, verse, translation, 6);
 
     return {
       bookId,
@@ -280,7 +363,9 @@ export class BibleManager {
       translation,
       parallelText,
       parallelTranslation: dualTranslation && dualTranslation !== translation ? dualTranslation : undefined,
-      crossReferences: crossReferences.length > 0 ? crossReferences : undefined
+      crossReferences: crossReferences.length > 0 ? crossReferences : undefined,
+      resolvedCrossReferences: resolvedCrossReferences.length > 0 ? resolvedCrossReferences : undefined,
+      chapterVerses: chapterVerses
     };
   }
 

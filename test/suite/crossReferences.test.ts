@@ -47,5 +47,28 @@ describe('Cross References Integrity Tests', () => {
     const groups = manager.getCrossReferences(1, 999, 999);
     assert.deepStrictEqual(groups, []);
   });
+
+  it('should resolve cross references with actual scripture text', () => {
+    const resolved = manager.resolveCrossReferences(43, 3, 16, 'kjv', 6);
+    assert.ok(resolved.length > 0, 'Should have resolved cross references');
+    for (const r of resolved) {
+      assert.ok(r.text.length > 0, `Resolved ref ${r.ref} should have non-empty text`);
+      assert.ok(r.bookName.length > 0, 'Should have book name');
+    }
+
+    // Verify Romans 5:8 is among the resolved references for John 3:16
+    const rom58 = resolved.find(r => r.ref.includes('Rom 5:8'));
+    assert.ok(rom58, 'Should find Rom 5:8 in resolved cross-references');
+    assert.ok(rom58.text.toLowerCase().includes('love') || rom58.text.toLowerCase().includes('sinners'));
+  });
+
+  it('should attach full chapter context and resolved cross-references to VerseData', () => {
+    const verseData = manager.getVerse(43, 3, 16, 'kjv');
+    assert.ok(verseData);
+    assert.ok(verseData.chapterVerses, 'Should contain full chapter verses');
+    assert.strictEqual(verseData.chapterVerses?.length, 36);
+    assert.ok(verseData.resolvedCrossReferences, 'Should contain resolved cross references');
+    assert.ok((verseData.resolvedCrossReferences?.length ?? 0) > 0);
+  });
 });
 

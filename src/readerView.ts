@@ -287,19 +287,25 @@ export class BibleReaderView {
       const isTarget = this.currentVerseTarget === vNum;
       const highlightClass = isTarget ? 'target-verse' : '';
       const bookmarkClass = isBookmarked ? 'is-bookmarked' : '';
-      const crossRefs = this.bibleManager.getCrossReferences(book.id, this.currentChapter, vNum);
-      const hasCrossRefs = crossRefs.length > 0;
+      const resolvedCrossRefs = this.bibleManager.resolveCrossReferences(book.id, this.currentChapter, vNum, this.primaryTranslation, 8);
+      const hasCrossRefs = resolvedCrossRefs.length > 0;
 
       let crossRefsHtml = '';
       if (hasCrossRefs) {
         crossRefsHtml = `
           <div class="cross-ref-tray" id="cross-tray-${vNum}" style="display:none;">
-            ${crossRefs.map(g => `
-              <div class="anchor-row">
-                <span class="anchor-tag">🔗 "${g.anchor}":</span>
-                ${g.refs.map(r => `<span class="ref-pill" onclick="jumpRef('${r}')">${r}</span>`).join('')}
-              </div>
-            `).join('')}
+            <div class="cross-ref-tray-title">🔗 Cross References & Connected Verses (${resolvedCrossRefs.length})</div>
+            <div class="cross-ref-list">
+              ${resolvedCrossRefs.map(cr => `
+                <div class="cross-ref-item" onclick="jumpRef('${cr.ref}')" title="Click to open ${cr.ref} in reader">
+                  <div class="cr-header">
+                    <span class="cr-citation">🔗 ${cr.bookName} ${cr.chapter}:${cr.verse}${cr.endVerse ? '-' + cr.endVerse : ''}</span>
+                    ${cr.anchor ? `<span class="cr-anchor">on "${cr.anchor}"</span>` : ''}
+                  </div>
+                  <div class="cr-verse-text">"${cr.text}"</div>
+                </div>
+              `).join('')}
+            </div>
           </div>
         `;
       }
@@ -573,15 +579,18 @@ export class BibleReaderView {
 
     /* Cross References Tray */
     .cross-ref-tray {
-      margin: 4px 0 10px 32px;
-      padding: 10px 14px;
+      margin: 6px 0 12px 32px;
+      padding: 12px 16px;
       background: var(--card-bg);
       border-left: 3px solid var(--accent);
-      border-radius: 0 6px 6px 0;
+      border-radius: 0 8px 8px 0;
       font-size: 13px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
+      max-height: 280px;
+      overflow-y: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
       animation: fadeIn 0.2s ease;
     }
 
@@ -590,19 +599,60 @@ export class BibleReaderView {
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .anchor-row {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 6px;
+    .cross-ref-tray-title {
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.85;
+      color: var(--accent);
     }
 
-    .anchor-tag {
+    .cross-ref-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .cross-ref-item {
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: var(--hover-bg);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .cross-ref-item:hover {
+      border-color: var(--accent);
+      background: var(--card-bg);
+      transform: translateX(3px);
+    }
+
+    .cr-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .cr-citation {
       font-weight: 600;
-      font-style: italic;
-      color: var(--fg);
-      opacity: 0.85;
+      color: var(--accent);
       font-size: 12px;
+    }
+
+    .cr-anchor {
+      font-size: 11px;
+      font-style: italic;
+      opacity: 0.75;
+    }
+
+    .cr-verse-text {
+      font-size: 13px;
+      line-height: 1.5;
+      opacity: 0.95;
+      font-style: italic;
     }
 
     .ref-pill {

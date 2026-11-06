@@ -437,8 +437,9 @@ export function activate(context: vscode.ExtensionContext) {
       const v = statusBarController.getVerse() || currentVerse;
       if (!v) return;
 
-      const groups = bibleManager.getCrossReferences(v.bookId, v.chapter, v.verse);
-      if (groups.length === 0) {
+      const settings = getSettings();
+      const resolved = bibleManager.resolveCrossReferences(v.bookId, v.chapter, v.verse, settings.translation, 20);
+      if (resolved.length === 0) {
         vscode.window.showInformationMessage(`No cross references indexed for ${v.bookName} ${v.chapter}:${v.verse}`);
         return;
       }
@@ -447,20 +448,19 @@ export function activate(context: vscode.ExtensionContext) {
         refString: string;
       }
 
-      const items: CrossRefPickItem[] = [];
-      for (const g of groups) {
-        for (const r of g.refs) {
-          items.push({
-            label: `🔗 ${r}`,
-            description: `Phrase: "${g.anchor}"`,
-            detail: `Cross reference from ${v.bookName} ${v.chapter}:${v.verse}`,
-            refString: r
-          });
-        }
-      }
+      const items: CrossRefPickItem[] = resolved.map(cr => {
+        const crBook = settings.translation === 'zulu' ? cr.zuluBookName : cr.bookName;
+        const rangeStr = cr.endVerse ? `-${cr.endVerse}` : '';
+        return {
+          label: `🔗 ${crBook} ${cr.chapter}:${cr.verse}${rangeStr}`,
+          description: cr.anchor ? `Phrase: "${cr.anchor}"` : undefined,
+          detail: `"${cr.text}"`,
+          refString: cr.ref
+        };
+      });
 
       const selected = await vscode.window.showQuickPick(items, {
-        placeHolder: `Cross References for ${v.bookName} ${v.chapter}:${v.verse} (${items.length} total)`
+        placeHolder: `Cross References with Scriptures for ${v.bookName} ${v.chapter}:${v.verse} (${items.length} passages)`
       });
 
       if (selected) {
