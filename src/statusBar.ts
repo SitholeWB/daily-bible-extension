@@ -79,10 +79,29 @@ export class StatusBarController {
         ? 'World English Bible (WEB)'
         : 'King James Version (KJV)';
 
-    // --- 1. VERSE SECTION ---
-    md.appendMarkdown(`### 📖 **${bookTitle} ${verse.chapter}:${verse.verse}**\n\n`);
-    md.appendMarkdown(`*${translationName}*\n\n`);
+    const bookmarkLabel = isBookmarked ? '$(star-full) Bookmarked' : '$(star-empty) Bookmark';
+    const bookmarkCmd = isBookmarked ? 'command:dailyBread.removeCurrentBookmark' : 'command:dailyBread.bookmarkCurrent';
+
+    // --- 1. HEADER & TOP ACTION BAR (Stretches tooltip width for comfortable reading) ---
+    md.appendMarkdown(
+      `| 📖 **${bookTitle} ${verse.chapter}:${verse.verse}** | 🌐 **${translationName}** |\n` +
+      `| :----------------------------------------------------------------------------- | -------------------------------------------------------------------: |\n\n`
+    );
+
+    md.appendMarkdown(
+      `[$(sync) Next Verse](command:dailyBread.nextVerse "Advance to next verse") &nbsp;&bull;&nbsp; ` +
+      `[$(book) Read In Editor](command:dailyBread.readChapter "Open full in-editor reader tab") &nbsp;&bull;&nbsp; ` +
+      `[🔗 Cross Refs Directory](command:dailyBread.showCrossReferences "View full cross-reference list") &nbsp;&bull;&nbsp; ` +
+      `[${bookmarkLabel}](${bookmarkCmd} "Save to favorites") &nbsp;&bull;&nbsp; ` +
+      `[$(copy) Copy](command:dailyBread.copyVerse "Copy verse to clipboard") &nbsp;&bull;&nbsp; ` +
+      `[$(globe) Switch Translation](command:dailyBread.switchTranslation "Change Bible translation") &nbsp;&bull;&nbsp; ` +
+      `[$(search) Search / Jump](command:dailyBread.jumpTo "Search any scripture")\n\n`
+    );
+
     md.appendMarkdown(`---\n\n`);
+
+    // --- 2. ACTIVE VERSE SECTION ---
+    md.appendMarkdown(`## 📖 **${bookTitle} ${verse.chapter}:${verse.verse}**\n\n`);
     md.appendMarkdown(`> ### **"${verse.text}"**\n\n`);
 
     if (verse.parallelText && verse.parallelTranslation) {
@@ -92,37 +111,39 @@ export class StatusBarController {
           : verse.parallelTranslation === 'web'
           ? 'WEB'
           : 'KJB';
-      md.appendMarkdown(`**Parallel (${parallelName}):**\n`);
-      md.appendMarkdown(`> *"${verse.parallelText}"*\n\n`);
+      md.appendMarkdown(`> **Parallel (${parallelName}):** *"${verse.parallelText}"*\n\n`);
     }
 
     md.appendMarkdown(`---\n\n`);
 
-    // --- 2. CHAPTER CONTEXT SECTION (Small, scrollable chapter context for that verse) ---
+    // --- 3. FULL CHAPTER CONTEXT SECTION (Long, verse-by-verse format for smooth scrolling) ---
     if (verse.chapterVerses && verse.chapterVerses.length > 0) {
       const totalV = verse.chapterVerses.length;
-      md.appendMarkdown(`<details open>\n<summary><b>📜 Context: ${bookTitle} Chapter ${verse.chapter} (Verses 1 to ${totalV})</b></summary>\n<br/>\n\n`);
+      md.appendMarkdown(
+        `### 📜 Full Chapter: **${bookTitle} Chapter ${verse.chapter}** (Verses 1 to ${totalV})\n\n` +
+        `*Scroll up and down to read all verses in context:*  \n\n`
+      );
 
-      // Render verses in compact flowing format with active verse highlighted
-      let chapterContent = '';
       for (let i = 0; i < totalV; i++) {
         const vNum = i + 1;
         const vText = verse.chapterVerses[i];
         if (vNum === verse.verse) {
-          chapterContent += `**<mark>&nbsp;👉 [${vNum}] ${vText}&nbsp;</mark>** `;
+          md.appendMarkdown(`👉 **<mark>&nbsp;[${vNum}] ${vText}&nbsp;</mark>** *(Active Verse)*  \n\n`);
         } else {
-          chapterContent += `<sup><b>${vNum}</b></sup> ${vText} `;
+          md.appendMarkdown(`**${vNum}.** ${vText}  \n\n`);
         }
       }
 
-      md.appendMarkdown(`${chapterContent}\n\n`);
-      md.appendMarkdown(`</details>\n\n---\n\n`);
+      md.appendMarkdown(`---\n\n`);
     }
 
-    // --- 3. CROSS REFERENCES SECTION (Scrollable with actual verses listed with refs) ---
+    // --- 4. CROSS REFERENCES SECTION (Scrollable list of actual scriptures with refs) ---
     if (verse.resolvedCrossReferences && verse.resolvedCrossReferences.length > 0) {
       const crList = verse.resolvedCrossReferences;
-      md.appendMarkdown(`<details open>\n<summary><b>🔗 Cross References & Connected Scriptures (${crList.length} passages)</b></summary>\n<br/>\n\n`);
+      md.appendMarkdown(
+        `### 🔗 Cross-References & Scripture Connections (${crList.length} Passages)\n\n` +
+        `*Scriptures connected by Treasury of Scripture Knowledge (TSK):*  \n\n`
+      );
 
       for (const cr of crList) {
         const crBook = verse.translation === 'zulu' ? cr.zuluBookName : cr.bookName;
@@ -130,14 +151,12 @@ export class StatusBarController {
         const citation = `${crBook} ${cr.chapter}:${cr.verse}${rangeStr}`;
         const cmdLink = `command:dailyBread.jumpToRef?${encodeURIComponent(JSON.stringify([cr.ref]))}`;
 
-        md.appendMarkdown(`**[🔗 ${citation}](${cmdLink} "Jump to ${citation}")**`);
-        if (cr.anchor) {
-          md.appendMarkdown(` *(on "${cr.anchor}")*`);
-        }
-        md.appendMarkdown(`\n> *"${cr.text}"*\n\n`);
+        const anchorText = cr.anchor ? ` &nbsp;*(connecting theme: "${cr.anchor}")*` : '';
+        md.appendMarkdown(`* **[📖 ${citation}](${cmdLink} "Jump to ${citation}")**${anchorText}  \n`);
+        md.appendMarkdown(`  > *"${cr.text}"*\n\n`);
       }
 
-      md.appendMarkdown(`</details>\n\n---\n\n`);
+      md.appendMarkdown(`---\n\n`);
     } else if (verse.crossReferences && verse.crossReferences.length > 0) {
       const topRefs: string[] = [];
       const seen = new Set<string>();
@@ -146,32 +165,30 @@ export class StatusBarController {
           if (!seen.has(r)) {
             seen.add(r);
             topRefs.push(r);
-            if (topRefs.length >= 6) break;
+            if (topRefs.length >= 12) break;
           }
         }
-        if (topRefs.length >= 6) break;
+        if (topRefs.length >= 12) break;
       }
 
       if (topRefs.length > 0) {
         const links = topRefs
           .map(r => `[🔗 ${r}](command:dailyBread.jumpToRef?${encodeURIComponent(JSON.stringify([r]))} "Jump to ${r}")`)
           .join(' &nbsp;&bull;&nbsp; ');
-        md.appendMarkdown(`**Cross-References:**\n${links}\n\n---\n\n`);
+        md.appendMarkdown(`### 🔗 Cross-References:\n${links}\n\n---\n\n`);
       }
     }
 
-    // --- 4. OTHER NAVIGATIONS SECTION ---
-    const bookmarkLabel = isBookmarked ? '$(star-full) Bookmarked' : '$(star-empty) Bookmark';
-    const bookmarkCmd = isBookmarked ? 'command:dailyBread.removeCurrentBookmark' : 'command:dailyBread.bookmarkCurrent';
-
+    // --- 5. BOTTOM NAVIGATION BAR ---
     md.appendMarkdown(
+      `### 🧭 Quick Navigation\n\n` +
       `[$(sync) Next Verse](command:dailyBread.nextVerse "Advance to next verse") &nbsp;&bull;&nbsp; ` +
       `[$(book) Read In Editor](command:dailyBread.readChapter "Open full in-editor reader tab") &nbsp;&bull;&nbsp; ` +
       `[🔗 Cross Refs Directory](command:dailyBread.showCrossReferences "View full cross-reference list") &nbsp;&bull;&nbsp; ` +
       `[${bookmarkLabel}](${bookmarkCmd} "Save to favorites") &nbsp;&bull;&nbsp; ` +
-      `[$(copy) Copy](command:dailyBread.copyVerse "Copy verse to clipboard") &nbsp;&bull;&nbsp; ` +
+      `[$(copy) Copy Verse](command:dailyBread.copyVerse "Copy verse to clipboard") &nbsp;&bull;&nbsp; ` +
       `[$(globe) Switch Translation](command:dailyBread.switchTranslation "Change Bible translation") &nbsp;&bull;&nbsp; ` +
-      `[$(search) Search / Jump](command:dailyBread.jumpTo "Search any scripture")`
+      `[$(search) Search / Jump](command:dailyBread.jumpTo "Search any scripture")\n`
     );
 
     return md;

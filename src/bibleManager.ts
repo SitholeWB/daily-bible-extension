@@ -351,7 +351,7 @@ export class BibleManager {
     }
 
     const crossReferences = this.getCrossReferences(bookId, chapter, verse);
-    const resolvedCrossReferences = this.resolveCrossReferences(bookId, chapter, verse, translation, 6);
+    const resolvedCrossReferences = this.resolveCrossReferences(bookId, chapter, verse, translation, 12);
 
     return {
       bookId,
