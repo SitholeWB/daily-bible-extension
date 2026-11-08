@@ -921,6 +921,10 @@ export class BibleReaderView {
 </html>`;
   }
 
+  public isVisible(): boolean {
+    return this.panel.visible;
+  }
+
   public dispose(): void {
     BibleReaderView.currentPanel = undefined;
     this.panel.dispose();

@@ -1,7 +1,7 @@
 # Daily Bible — Offline & Scripture Status Bar 📖
 
 [![CI](https://github.com/SitholeWB/daily-bible-extension/actions/workflows/ci.yml/badge.svg)](https://github.com/SitholeWB/daily-bible-extension/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-1.3.2-blue.svg)](https://marketplace.visualstudio.com)
+[![Version](https://img.shields.io/badge/version-1.3.3-blue.svg)](https://marketplace.visualstudio.com)
 [![Offline](https://img.shields.io/badge/network-100%25%20offline-success.svg)](https://github.com)
 [![Translations](https://img.shields.io/badge/translations-isiZulu%20%7C%20WEB%20%7C%20KJV-purple.svg)](https://github.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

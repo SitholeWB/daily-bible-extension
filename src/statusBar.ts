@@ -35,38 +35,40 @@ export class StatusBarController {
     verse: VerseData,
     displayMode: StatusDisplayMode,
     iconType: StatusIconType,
-    isBookmarked: boolean = false
+    isBookmarked: boolean = false,
+    isPaused: boolean = false
   ): void {
     this.currentVerse = verse;
 
     const icon = this.getIconSymbol(iconType);
     const star = isBookmarked ? '⭐ ' : '';
+    const pausePrefix = isPaused ? '⏸ ' : '';
     const bookTitle = verse.translation === 'zulu' ? verse.zuluBookName : verse.bookName;
     const ref = `${bookTitle} ${verse.chapter}:${verse.verse}`;
 
     let displayText = '';
     switch (displayMode) {
       case 'compact':
-        displayText = `${star}${icon}${ref}`;
+        displayText = `${star}${pausePrefix}${icon}${ref}`;
         break;
 
       case 'preview': {
         const snippet = verse.text.length > 40 ? verse.text.slice(0, 37) + '...' : verse.text;
-        displayText = `${star}${icon}${ref} — "${snippet}"`;
+        displayText = `${star}${pausePrefix}${icon}${ref} — "${snippet}"`;
         break;
       }
 
       case 'full':
-        displayText = `${star}${icon}${ref} — "${verse.text}"`;
+        displayText = `${star}${pausePrefix}${icon}${ref} — "${verse.text}"`;
         break;
     }
 
     this.statusBarItem.text = displayText;
-    this.statusBarItem.tooltip = this.createTooltip(verse, isBookmarked);
+    this.statusBarItem.tooltip = this.createTooltip(verse, isBookmarked, isPaused);
     this.statusBarItem.show();
   }
 
-  private createTooltip(verse: VerseData, isBookmarked: boolean): vscode.MarkdownString {
+  private createTooltip(verse: VerseData, isBookmarked: boolean, isPaused: boolean = false): vscode.MarkdownString {
     const md = new vscode.MarkdownString();
     md.isTrusted = true;
     md.supportHtml = true;
@@ -82,14 +84,28 @@ export class StatusBarController {
     const bookmarkLabel = isBookmarked ? '$(star-full) Bookmarked' : '$(star-empty) Bookmark';
     const bookmarkCmd = isBookmarked ? 'command:dailyBread.removeCurrentBookmark' : 'command:dailyBread.bookmarkCurrent';
 
+    const pauseLabel = isPaused ? '$(play) Resume Auto-Rotation' : '$(debug-pause) Pause Rotation';
+    const pauseTooltip = isPaused
+      ? 'Resume automatic rotating verses'
+      : 'Pause auto-rotation (Reading Mode: prevents verses from changing while reading)';
+
     // --- 1. HEADER & TOP ACTION BAR (Stretches tooltip width for comfortable reading) ---
     md.appendMarkdown(
       `| 📖 **${bookTitle} ${verse.chapter}:${verse.verse}** | 🌐 **${translationName}** |\n` +
       `| :----------------------------------------------------------------------------- | -------------------------------------------------------------------: |\n\n`
     );
 
+    if (isPaused) {
+      md.appendMarkdown(
+        `> ⏸ **Reading Mode Active** — Auto-rotation is paused. Verses will not change automatically while you read.  \n` +
+        `> [$(play) Click to Resume Auto-Rotation](command:dailyBread.togglePauseRotation "Resume automatic rotation") &nbsp;&bull;&nbsp; ` +
+        `[$(sync) Advance Verse Manually](command:dailyBread.nextVerse "Advance to next verse")\n\n`
+      );
+    }
+
     md.appendMarkdown(
       `[$(sync) Next Verse](command:dailyBread.nextVerse "Advance to next verse") &nbsp;&bull;&nbsp; ` +
+      `[${pauseLabel}](command:dailyBread.togglePauseRotation "${pauseTooltip}") &nbsp;&bull;&nbsp; ` +
       `[$(book) Read In Editor](command:dailyBread.readChapter "Open full in-editor reader tab") &nbsp;&bull;&nbsp; ` +
       `[🔗 Cross Refs Directory](command:dailyBread.showCrossReferences "View full cross-reference list") &nbsp;&bull;&nbsp; ` +
       `[${bookmarkLabel}](${bookmarkCmd} "Save to favorites") &nbsp;&bull;&nbsp; ` +
@@ -184,6 +200,7 @@ export class StatusBarController {
     md.appendMarkdown(
       `### 🧭 Quick Navigation\n\n` +
       `[$(sync) Next Verse](command:dailyBread.nextVerse "Advance to next verse") &nbsp;&bull;&nbsp; ` +
+      `[${pauseLabel}](command:dailyBread.togglePauseRotation "${pauseTooltip}") &nbsp;&bull;&nbsp; ` +
       `[$(book) Read In Editor](command:dailyBread.readChapter "Open full in-editor reader tab") &nbsp;&bull;&nbsp; ` +
       `[🔗 Cross Refs Directory](command:dailyBread.showCrossReferences "View full cross-reference list") &nbsp;&bull;&nbsp; ` +
       `[${bookmarkLabel}](${bookmarkCmd} "Save to favorites") &nbsp;&bull;&nbsp; ` +

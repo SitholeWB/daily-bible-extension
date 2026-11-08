@@ -44,10 +44,12 @@ export function activate(context: vscode.ExtensionContext) {
     };
   };
 
+  let isRotationPaused: boolean = false;
+
   const updateVerseDisplay = (verse: VerseData) => {
     const settings = getSettings();
     const isBookmarked = bookmarksManager.isBookmarked(verse.bookId, verse.chapter, verse.verse);
-    statusBarController.update(verse, settings.displayMode, settings.icon, isBookmarked);
+    statusBarController.update(verse, settings.displayMode, settings.icon, isBookmarked, isRotationPaused);
   };
 
   // Initial verse
@@ -61,6 +63,10 @@ export function activate(context: vscode.ExtensionContext) {
     if (rotationTimer) {
       clearInterval(rotationTimer);
       rotationTimer = undefined;
+    }
+
+    if (isRotationPaused) {
+      return;
     }
 
     const settings = getSettings();
@@ -90,7 +96,22 @@ export function activate(context: vscode.ExtensionContext) {
     }
   };
 
+  const resetRotationTimerIfActive = () => {
+    if (!isRotationPaused && rotationTimer) {
+      setupRotation();
+    }
+  };
+
   const rotateNextVerse = () => {
+    if (isRotationPaused) {
+      return;
+    }
+
+    // Do not auto-rotate while the user has the in-editor reader tab open and visible
+    if (BibleReaderView.currentPanel && BibleReaderView.currentPanel.isVisible()) {
+      return;
+    }
+
     const settings = getSettings();
     const dual = settings.dualTranslation !== 'none' ? settings.dualTranslation : undefined;
     currentVerse = statusBarController.getVerse()
@@ -158,7 +179,19 @@ export function activate(context: vscode.ExtensionContext) {
   // 1. Next Verse
   context.subscriptions.push(
     vscode.commands.registerCommand('dailyBread.nextVerse', () => {
-      rotateNextVerse();
+      // Manual trigger advances verse even in Reading Mode (paused rotation)
+      const settings = getSettings();
+      const dual = settings.dualTranslation !== 'none' ? settings.dualTranslation : undefined;
+      currentVerse = statusBarController.getVerse()
+        ? bibleManager.getNextCuratedVerse(
+            statusBarController.getVerse()!,
+            settings.topic,
+            settings.translation,
+            dual
+          )
+        : bibleManager.getRandomVerse(settings.topic, settings.translation, dual);
+      updateVerseDisplay(currentVerse);
+      resetRotationTimerIfActive();
     })
   );
 
@@ -395,6 +428,7 @@ export function activate(context: vscode.ExtensionContext) {
       if (vData) {
         currentVerse = vData;
         updateVerseDisplay(currentVerse);
+        resetRotationTimerIfActive();
       }
 
       // Open in Reader
@@ -425,6 +459,7 @@ export function activate(context: vscode.ExtensionContext) {
       if (vData) {
         currentVerse = vData;
         updateVerseDisplay(currentVerse);
+        resetRotationTimerIfActive();
       }
       BibleReaderView.createOrShow(
         context.extensionUri,
@@ -578,6 +613,18 @@ export function activate(context: vscode.ExtensionContext) {
           detail: 'Browse, filter, and jump to your saved favorites'
         },
         {
+          label: isRotationPaused ? '$(play) Resume Auto-Rotation' : '$(debug-pause) Pause Auto-Rotation (Reading Mode)',
+          description: isRotationPaused ? 'Auto-rotation currently paused' : `Schedule: ${getSettings().rotationSchedule}`,
+          detail: isRotationPaused
+            ? 'Resume automatic scripture cycling'
+            : 'Freeze verse so it never changes while you are reading'
+        },
+        {
+          label: '$(clock) Change Rotation Schedule',
+          description: `Current: ${getSettings().rotationSchedule}`,
+          detail: 'Adjust how often verses change (5min, 15min, 30min, 60min, onEditorOpen, or Manual)'
+        },
+        {
           label: '$(tag) Select Topic / Mood',
           description: `Current: ${getSettings().topic}`,
           detail: 'Filter status bar by Peace, Focus, Strength, Joy, Gratitude, or Comfort'
@@ -627,6 +674,10 @@ export function activate(context: vscode.ExtensionContext) {
 
       if (selected.label.includes('Next Verse')) {
         rotateNextVerse();
+      } else if (selected.label.includes('Auto-Rotation')) {
+        vscode.commands.executeCommand('dailyBread.togglePauseRotation');
+      } else if (selected.label.includes('Change Rotation Schedule')) {
+        vscode.commands.executeCommand('dailyBread.setRotationSchedule');
       } else if (selected.label.includes('Read Full Chapter')) {
         vscode.commands.executeCommand('dailyBread.readChapter');
       } else if (selected.label.includes('View Verse Cross-References')) {
@@ -756,6 +807,80 @@ export function activate(context: vscode.ExtensionContext) {
 
       await vscode.workspace.getConfiguration('dailyBread').update('fontFamily', picked.family, vscode.ConfigurationTarget.Global);
       vscode.window.showInformationMessage(`Daily Bible font family set to: ${picked.label.replace(/\$\([^)]+\)\s*/, '')}`);
+    })
+  );
+
+  // 18. Toggle Pause Rotation Command (Reading Mode)
+  context.subscriptions.push(
+    vscode.commands.registerCommand('dailyBread.togglePauseRotation', () => {
+      isRotationPaused = !isRotationPaused;
+      if (isRotationPaused) {
+        if (rotationTimer) {
+          clearInterval(rotationTimer);
+          rotationTimer = undefined;
+        }
+        vscode.window.showInformationMessage('⏸ Daily Bible: Auto-rotation paused (Reading Mode active). Verses will not change while you read.');
+      } else {
+        setupRotation();
+        vscode.window.showInformationMessage('▶ Daily Bible: Auto-rotation resumed.');
+      }
+      if (currentVerse) {
+        updateVerseDisplay(currentVerse);
+      }
+    })
+  );
+
+  // 19. Set Rotation Schedule Command
+  context.subscriptions.push(
+    vscode.commands.registerCommand('dailyBread.setRotationSchedule', async () => {
+      const current = getSettings().rotationSchedule;
+      const items = [
+        {
+          label: '$(clock) Every 15 minutes',
+          description: current === '15min' ? 'Currently Active' : '',
+          detail: 'Recommended: Balanced rotation frequency',
+          value: '15min'
+        },
+        {
+          label: '$(clock) Every 30 minutes',
+          description: current === '30min' ? 'Currently Active' : '',
+          detail: 'Spacious interval for longer reading',
+          value: '30min'
+        },
+        {
+          label: '$(clock) Every 60 minutes',
+          description: current === '60min' ? 'Currently Active' : '',
+          detail: 'One verse per hour',
+          value: '60min'
+        },
+        {
+          label: '$(clock) Every 5 minutes',
+          description: current === '5min' ? 'Currently Active' : '',
+          detail: 'Frequent rotation',
+          value: '5min'
+        },
+        {
+          label: '$(edit) On Editor Open',
+          description: current === 'onEditorOpen' ? 'Currently Active' : '',
+          detail: 'Rotate whenever you switch or open an editor file',
+          value: 'onEditorOpen'
+        },
+        {
+          label: '$(debug-pause) Manual Only (Never change automatically)',
+          description: current === 'manual' ? 'Currently Active' : '',
+          detail: 'Verses only change when you press Ctrl+Alt+B / Cmd+Alt+B or click Next',
+          value: 'manual'
+        }
+      ];
+
+      const picked = await vscode.window.showQuickPick(items, {
+        placeHolder: `Select how often the status bar scripture rotates (Current: ${current})`
+      });
+
+      if (!picked) return;
+
+      await vscode.workspace.getConfiguration('dailyBread').update('rotationSchedule', picked.value, vscode.ConfigurationTarget.Global);
+      vscode.window.showInformationMessage(`Daily Bible rotation schedule set to: ${picked.label.replace(/\$\([^)]+\)\s*/, '')}`);
     })
   );
 
