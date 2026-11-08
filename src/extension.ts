@@ -37,6 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
       icon: config.get<StatusIconType>('icon', 'cross'),
       rotationSchedule: config.get<RotationSchedule>('rotationSchedule', '15min'),
       rotateOnFileSave: config.get<boolean>('rotateOnFileSave', false),
+      preventRotationWhileReading: config.get<boolean>('preventRotationWhileReading', true),
       topic: config.get<string>('topic', 'all'),
       dualTranslation: config.get<Translation | 'none'>('dualTranslation', 'none'),
       fontSize: config.get<number>('fontSize', 0),
@@ -45,6 +46,16 @@ export function activate(context: vscode.ExtensionContext) {
   };
 
   let isRotationPaused: boolean = false;
+  let isRotationPending: boolean = false;
+  let lastEditorInteractionTime: number = Date.now();
+
+  const recordEditorInteraction = () => {
+    lastEditorInteractionTime = Date.now();
+    if (isRotationPending && !isRotationPaused) {
+      isRotationPending = false;
+      rotateNextVerse(true);
+    }
+  };
 
   const updateVerseDisplay = (verse: VerseData) => {
     const settings = getSettings();
@@ -91,7 +102,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     if (ms > 0) {
       rotationTimer = setInterval(() => {
-        rotateNextVerse();
+        rotateNextVerse(false);
       }, ms);
     }
   };
@@ -102,7 +113,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
   };
 
-  const rotateNextVerse = () => {
+  const rotateNextVerse = (force: boolean = false) => {
     if (isRotationPaused) {
       return;
     }
@@ -113,6 +124,20 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     const settings = getSettings();
+
+    // Hover & Reading Protection:
+    // In VS Code, when hovering and reading the status bar hover tooltip, the editor is idle.
+    // If the editor has been idle for > 3 seconds, postpone rotation so the hover popup is not dismissed.
+    // The rotation will apply smoothly the instant the user returns to their code.
+    if (!force && settings.preventRotationWhileReading) {
+      const editorIdleMs = Date.now() - lastEditorInteractionTime;
+      if (editorIdleMs > 3000) {
+        isRotationPending = true;
+        return;
+      }
+    }
+
+    isRotationPending = false;
     const dual = settings.dualTranslation !== 'none' ? settings.dualTranslation : undefined;
     currentVerse = statusBarController.getVerse()
       ? bibleManager.getNextCuratedVerse(
@@ -127,11 +152,34 @@ export function activate(context: vscode.ExtensionContext) {
 
   setupRotation();
 
-  // On Editor Open trigger
+  // User interaction triggers to detect when user returns to editor (hover tooltip is guaranteed closed)
   context.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor(editor => {
+      recordEditorInteraction();
       if (editor && getSettings().rotationSchedule === 'onEditorOpen') {
-        rotateNextVerse();
+        rotateNextVerse(true);
+      }
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.window.onDidChangeTextEditorSelection(() => {
+      recordEditorInteraction();
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeTextDocument(e => {
+      if (e.contentChanges && e.contentChanges.length > 0) {
+        recordEditorInteraction();
+      }
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.window.onDidChangeWindowState(state => {
+      if (state.focused) {
+        recordEditorInteraction();
       }
     })
   );
@@ -139,8 +187,9 @@ export function activate(context: vscode.ExtensionContext) {
   // Rotate on File Save trigger
   context.subscriptions.push(
     vscode.workspace.onDidSaveTextDocument(() => {
+      recordEditorInteraction();
       if (getSettings().rotateOnFileSave) {
-        rotateNextVerse();
+        rotateNextVerse(true);
       }
     })
   );
@@ -179,18 +228,9 @@ export function activate(context: vscode.ExtensionContext) {
   // 1. Next Verse
   context.subscriptions.push(
     vscode.commands.registerCommand('dailyBread.nextVerse', () => {
-      // Manual trigger advances verse even in Reading Mode (paused rotation)
-      const settings = getSettings();
-      const dual = settings.dualTranslation !== 'none' ? settings.dualTranslation : undefined;
-      currentVerse = statusBarController.getVerse()
-        ? bibleManager.getNextCuratedVerse(
-            statusBarController.getVerse()!,
-            settings.topic,
-            settings.translation,
-            dual
-          )
-        : bibleManager.getRandomVerse(settings.topic, settings.translation, dual);
-      updateVerseDisplay(currentVerse);
+      // Manual trigger advances verse immediately even if reading
+      isRotationPending = false;
+      rotateNextVerse(true);
       resetRotationTimerIfActive();
     })
   );
@@ -354,7 +394,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       if (selected) {
         await vscode.workspace.getConfiguration('dailyBread').update('topic', selected.topicId, vscode.ConfigurationTarget.Global);
-        rotateNextVerse();
+        rotateNextVerse(true);
         vscode.window.showInformationMessage(`Daily Bible topic set to: ${selected.label}`);
       }
     })
@@ -673,7 +713,7 @@ export function activate(context: vscode.ExtensionContext) {
       if (!selected) return;
 
       if (selected.label.includes('Next Verse')) {
-        rotateNextVerse();
+        rotateNextVerse(true);
       } else if (selected.label.includes('Auto-Rotation')) {
         vscode.commands.executeCommand('dailyBread.togglePauseRotation');
       } else if (selected.label.includes('Change Rotation Schedule')) {

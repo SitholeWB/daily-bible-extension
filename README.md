@@ -1,7 +1,7 @@
 # Daily Bible — Offline & Scripture Status Bar 📖
 
 [![CI](https://github.com/SitholeWB/daily-bible-extension/actions/workflows/ci.yml/badge.svg)](https://github.com/SitholeWB/daily-bible-extension/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-1.3.3-blue.svg)](https://marketplace.visualstudio.com)
+[![Version](https://img.shields.io/badge/version-1.3.4-blue.svg)](https://marketplace.visualstudio.com)
 [![Offline](https://img.shields.io/badge/network-100%25%20offline-success.svg)](https://github.com)
 [![Translations](https://img.shields.io/badge/translations-isiZulu%20%7C%20WEB%20%7C%20KJV-purple.svg)](https://github.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -103,6 +103,7 @@ Configure via VS Code Settings (`Ctrl+,` or `Cmd+,`, search for `dailyBread`):
 | `dailyBread.icon` | `"cross"` | `"cross"`, `"book"`, `"dove"`, `"none"` | Status bar icon prefix |
 | `dailyBread.rotationSchedule` | `"15min"` | `"manual"`, `"5min"`, `"15min"`, `"30min"`, `"60min"`, `"onEditorOpen"` | Timer frequency for rotating scripture |
 | `dailyBread.rotateOnFileSave` | `false` | `true`, `false` | Rotate scripture on saving files |
+| `dailyBread.preventRotationWhileReading` | `true` | `true`, `false` | Prevents status bar scripture from changing while reading hover card or reader |
 | `dailyBread.topic` | `"all"` | `"all"`, `"peace"`, `"wisdom"`, `"strength"`, `"comfort"`, `"gratitude"`, `"joy"` | Filter rotation by topic / mood |
 
 ---

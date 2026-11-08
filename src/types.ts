@@ -79,6 +79,7 @@ export interface ExtensionSettings {
   icon: StatusIconType;
   rotationSchedule: RotationSchedule;
   rotateOnFileSave: boolean;
+  preventRotationWhileReading: boolean;
   topic: string; // 'all' or topic id
   dualTranslation: Translation | 'none';
   fontSize: number; // 0 = match editor font size

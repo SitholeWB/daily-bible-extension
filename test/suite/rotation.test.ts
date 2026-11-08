@@ -35,5 +35,41 @@ describe('Scripture Rotation & Navigation Tests', () => {
     assert.strictEqual(nextCh.chapter, 24);
     assert.strictEqual(nextCh.verse, 1);
   });
+
+  it('should simulate hover & reading protection timing logic', () => {
+    // When user is reading hover tooltip, editor is idle (> 3000ms)
+    let lastEditorInteraction = Date.now() - 5000;
+    let isRotationPending = false;
+    let verseChanged = false;
+
+    const attemptAutoRotate = (force = false, preventWhileReading = true) => {
+      if (!force && preventWhileReading) {
+        const idleMs = Date.now() - lastEditorInteraction;
+        if (idleMs > 3000) {
+          isRotationPending = true;
+          return;
+        }
+      }
+      isRotationPending = false;
+      verseChanged = true;
+    };
+
+    // Auto-rotation fires while user is hovering & reading
+    attemptAutoRotate(false, true);
+    assert.strictEqual(isRotationPending, true, 'Rotation must be held pending while reading');
+    assert.strictEqual(verseChanged, false, 'Verse must not change while reading');
+
+    // User finishes reading and interacts with editor
+    const onEditorInteraction = () => {
+      lastEditorInteraction = Date.now();
+      if (isRotationPending) {
+        attemptAutoRotate(true);
+      }
+    };
+
+    onEditorInteraction();
+    assert.strictEqual(isRotationPending, false, 'Pending rotation should clear on resume');
+    assert.strictEqual(verseChanged, true, 'Verse should rotate cleanly when user returns to editor');
+  });
 });
 

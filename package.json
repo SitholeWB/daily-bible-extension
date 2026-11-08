@@ -2,7 +2,7 @@
   "name": "daily-bread-statusbar",
   "displayName": "Daily Bible — Offline & Scripture Status Bar",
   "description": "100% Offline Holy Bible (isiZulu 1959, English WEB & KJV) with glanceable status bar scriptures, parallel dual-reader, bookmarks, and curated mood themes.",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "publisher": "sitholewb",
   "icon": "media/icon.png",
   "repository": {
@@ -283,6 +283,11 @@
           "type": "boolean",
           "default": false,
           "description": "When enabled, automatically rotates to a fresh encouraging verse whenever you save a file."
+        },
+        "dailyBread.preventRotationWhileReading": {
+          "type": "boolean",
+          "default": true,
+          "description": "Prevents the status bar scripture from auto-changing while you are reading. Any rotation that becomes due while reading will wait until you resume interacting with the editor."
         },
         "dailyBread.topic": {
           "type": "string",
