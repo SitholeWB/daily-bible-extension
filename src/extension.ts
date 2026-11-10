@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { BibleManager } from './bibleManager';
 import { BookmarksManager } from './bookmarks';
 import { BibleReaderView } from './readerView';
+import { TranslationSwitcherView } from './translationSwitcherView';
 import { StatusBarController } from './statusBar';
 import { BibleExplorerProvider } from './sidebar/bibleExplorerProvider';
 import { BookmarksProvider, BookmarkTreeItem } from './sidebar/bookmarksProvider';
@@ -14,7 +15,7 @@ let statusBarController: StatusBarController;
 let rotationTimer: NodeJS.Timeout | undefined;
 
 export function activate(context: vscode.ExtensionContext) {
-  bibleManager = new BibleManager(context.extensionPath);
+  bibleManager = new BibleManager(context.extensionPath, context.globalStorageUri.fsPath);
   bookmarksManager = new BookmarksManager(context);
   statusBarController = new StatusBarController();
 
@@ -31,15 +32,22 @@ export function activate(context: vscode.ExtensionContext) {
   // Settings
   const getSettings = (): ExtensionSettings => {
     const config = vscode.workspace.getConfiguration('dailyBread');
+    const rawTranslation = config.get<Translation>('translation', 'kjv');
+    const rawDual = config.get<Translation | 'none'>('dualTranslation', 'none');
+
+    const safeTranslation = bibleManager.isTranslationInstalled(rawTranslation) ? rawTranslation : 'kjv';
+    const safeDual =
+      rawDual !== 'none' && bibleManager.isTranslationInstalled(rawDual) ? rawDual : 'none';
+
     return {
-      translation: config.get<Translation>('translation', 'kjv'),
+      translation: safeTranslation,
       displayMode: config.get<StatusDisplayMode>('displayMode', 'preview'),
       icon: config.get<StatusIconType>('icon', 'cross'),
       rotationSchedule: config.get<RotationSchedule>('rotationSchedule', '15min'),
       rotateOnFileSave: config.get<boolean>('rotateOnFileSave', false),
       preventRotationWhileReading: config.get<boolean>('preventRotationWhileReading', true),
       topic: config.get<string>('topic', 'all'),
-      dualTranslation: config.get<Translation | 'none'>('dualTranslation', 'none'),
+      dualTranslation: safeDual,
       fontSize: config.get<number>('fontSize', 0),
       fontFamily: config.get<string>('fontFamily', 'editor')
     };
@@ -204,6 +212,7 @@ export function activate(context: vscode.ExtensionContext) {
       ) {
         setupRotation();
         BibleReaderView.updateCurrent();
+        TranslationSwitcherView.updateCurrent();
         const settings = getSettings();
         if (currentVerse) {
           const dual = settings.dualTranslation !== 'none' ? settings.dualTranslation : undefined;
@@ -400,43 +409,33 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
-  // 9. Switch Translation
+  // 9. Switch Translation (In-Editor Searchable Library & Downloader)
   context.subscriptions.push(
-    vscode.commands.registerCommand('dailyBread.switchTranslation', async () => {
-      const items = [
+    vscode.commands.registerCommand('dailyBread.switchTranslation', (mode?: 'primary' | 'parallel') => {
+      const targetMode = mode === 'parallel' ? 'parallel' : 'primary';
+      TranslationSwitcherView.createOrShow(
+        bibleManager,
         {
-          label: '📜 English — King James Bible / Version (KJB / KJV)',
-          description: 'Classic, majestic, traditional poetic English (1611/1769) [Default]',
-          translation: 'kjv' as Translation
+          onTranslationActivated: () => {
+            const settings = getSettings();
+            const dual = settings.dualTranslation !== 'none' ? settings.dualTranslation : undefined;
+            const current = statusBarController.getVerse() || currentVerse;
+            const reloaded = bibleManager.getVerse(
+              current.bookId,
+              current.chapter,
+              current.verse,
+              settings.translation,
+              dual
+            );
+            if (reloaded) {
+              currentVerse = reloaded;
+              updateVerseDisplay(currentVerse);
+            }
+            BibleReaderView.updateCurrent();
+          }
         },
-        {
-          label: '🇬🇧 English — World English Bible (WEB)',
-          description: 'Clean, modern, highly readable English public domain Bible',
-          translation: 'web' as Translation
-        },
-        {
-          label: '🇿🇦 isiZulu — IBhayibheli Elingcwele (1959)',
-          description: 'South African Zulu 1959 Translation with authentic Zulu book names',
-          translation: 'zulu' as Translation
-        }
-      ];
-
-      const selected = await vscode.window.showQuickPick(items, {
-        placeHolder: 'Choose Bible Translation'
-      });
-
-      if (selected) {
-        await vscode.workspace.getConfiguration('dailyBread').update('translation', selected.translation, vscode.ConfigurationTarget.Global);
-        const settings = getSettings();
-        const dual = settings.dualTranslation !== 'none' ? settings.dualTranslation : undefined;
-        const current = statusBarController.getVerse() || currentVerse;
-        const reloaded = bibleManager.getVerse(current.bookId, current.chapter, current.verse, selected.translation, dual);
-        if (reloaded) {
-          currentVerse = reloaded;
-          updateVerseDisplay(currentVerse);
-        }
-        vscode.window.showInformationMessage(`Active translation: ${selected.label}`);
-      }
+        targetMode
+      );
     })
   );
 
@@ -680,9 +679,9 @@ export function activate(context: vscode.ExtensionContext) {
           detail: 'Switch between Editor font, Book Serif, Clean Sans-Serif, or Monospace'
         },
         {
-          label: '$(globe) Switch Translation',
+          label: '$(globe) Switch / Download Translations',
           description: `Current: ${getSettings().translation.toUpperCase()}`,
-          detail: 'Toggle between isiZulu 1959, English WEB, and English KJV'
+          detail: 'Search, switch, or download additional offline Bible translations & languages'
         },
         {
           label: '$(search) Search & Jump to Verse',
@@ -734,7 +733,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.executeCommand('dailyBread.changeFontSize');
       } else if (selected.label.includes('Change Font Family')) {
         vscode.commands.executeCommand('dailyBread.changeFontFamily');
-      } else if (selected.label.includes('Switch Translation')) {
+      } else if (selected.label.includes('Switch / Download Translations')) {
         vscode.commands.executeCommand('dailyBread.switchTranslation');
       } else if (selected.label.includes('Search & Jump')) {
         vscode.commands.executeCommand('dailyBread.jumpTo');

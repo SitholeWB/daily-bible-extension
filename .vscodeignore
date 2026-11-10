@@ -4,9 +4,11 @@
 src/**
 test/**
 scripts/**
+packs/**
 out/**
 tsconfig*.json
 esbuild.js
 .gitignore
 *.log
+*.vsix
 

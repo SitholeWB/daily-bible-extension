@@ -1,18 +1,25 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { BookMetadata, CrossReferenceGroup, CuratedTopic, ResolvedCrossReference, Translation, VerseData, VerseRef } from './types';
+import { BookMetadata, CrossReferenceGroup, CuratedTopic, ResolvedCrossReference, Translation, TranslationInfo, VerseData, VerseRef } from './types';
+import { downloadBuffer, parseAndValidatePack } from './translationDownloader';
 
 export class BibleManager {
+  private extensionPath: string;
   private dataDir: string;
+  private globalStoragePath?: string;
   private books: BookMetadata[] = [];
   private booksById: Map<number, BookMetadata> = new Map();
   private aliasMap: Map<string, BookMetadata> = new Map();
   private topics: Record<string, CuratedTopic> = {};
+  private catalog: TranslationInfo[] = [];
+  private catalogById: Map<string, TranslationInfo> = new Map();
   private cache: Map<string, string[][]> = new Map(); // key: `${translation}:${bookId}`
   private crossRefCache: Map<number, Record<string, Record<string, CrossReferenceGroup[]>>> = new Map();
   private curatedVerseList: VerseRef[] = [];
 
-  constructor(extensionPath: string) {
+  constructor(extensionPath: string, globalStoragePath?: string) {
+    this.extensionPath = extensionPath;
+    this.globalStoragePath = globalStoragePath;
     const candidates = [
       path.join(extensionPath, 'data'),
       path.join(extensionPath, '..', 'data'),
@@ -41,6 +48,41 @@ export class BibleManager {
         this.booksById.set(b.id, b);
         this.indexBookAliases(b);
       }
+    }
+
+    const catalogPath = path.join(this.dataDir, 'translations_catalog.json');
+    if (fs.existsSync(catalogPath)) {
+      this.catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
+    } else {
+      this.catalog = [
+        {
+          id: 'kjv',
+          languageCode: 'en',
+          language: 'English',
+          name: 'King James Version (KJV)',
+          shortName: 'KJV',
+          direction: 'ltr',
+          copyright: 'Public Domain (1769 Oxford Standard)',
+          bundled: true,
+          sizeKB: 4200,
+          region: 'Default Offline'
+        },
+        {
+          id: 'zulu',
+          languageCode: 'zu',
+          language: 'isiZulu',
+          name: 'IBhayibheli Elingcwele (1959)',
+          shortName: 'ZULU',
+          direction: 'ltr',
+          copyright: 'Public Domain (1959 Edition)',
+          bundled: true,
+          sizeKB: 3800,
+          region: 'Default Offline'
+        }
+      ];
+    }
+    for (const item of this.catalog) {
+      this.catalogById.set(item.id, item);
     }
 
     const topicsPath = path.join(this.dataDir, 'curated_topics.json');
@@ -105,6 +147,111 @@ export class BibleManager {
 
   public getCuratedTopics(): Record<string, CuratedTopic> {
     return this.topics;
+  }
+
+  public getCatalog(): TranslationInfo[] {
+    return this.catalog;
+  }
+
+  public getTranslationInfo(id: string): TranslationInfo | undefined {
+    return this.catalogById.get(id);
+  }
+
+  private getDownloadedPackPath(id: string): string | undefined {
+    if (!this.globalStoragePath) return undefined;
+    return path.join(this.globalStoragePath, 'translations', `${id}.json.gz`);
+  }
+
+  private getDevPackPath(id: string): string | undefined {
+    const candidates = [
+      path.join(this.extensionPath, 'packs', `${id}.json.gz`),
+      path.join(this.extensionPath, '..', 'packs', `${id}.json.gz`),
+      path.resolve(__dirname, '..', 'packs', `${id}.json.gz`),
+      path.resolve(process.cwd(), 'packs', `${id}.json.gz`)
+    ];
+    for (const c of candidates) {
+      if (fs.existsSync(c)) return c;
+    }
+    return undefined;
+  }
+
+  public isTranslationInstalled(id: string): boolean {
+    if (fs.existsSync(path.join(this.dataDir, 'translations', id, '1.json'))) {
+      return true;
+    }
+    const downloadedPath = this.getDownloadedPackPath(id);
+    if (downloadedPath && fs.existsSync(downloadedPath)) {
+      return true;
+    }
+    // Check if already cached in memory
+    if (this.cache.has(`${id}:1`)) {
+      return true;
+    }
+    return false;
+  }
+
+  public getInstalledTranslations(): TranslationInfo[] {
+    return this.catalog.filter(t => this.isTranslationInstalled(t.id));
+  }
+
+  public async downloadTranslation(id: string): Promise<void> {
+    const info = this.catalogById.get(id);
+    if (!info) {
+      throw new Error(`Unknown translation ID: ${id}`);
+    }
+    if (info.bundled && fs.existsSync(path.join(this.dataDir, 'translations', id, '1.json'))) {
+      return;
+    }
+
+    const destPath = this.getDownloadedPackPath(id);
+    if (!destPath) {
+      throw new Error('Offline storage path is not configured.');
+    }
+
+    let gzBuffer: Buffer;
+    const localDevPack = this.getDevPackPath(id);
+    if (info.downloadUrl) {
+      try {
+        gzBuffer = await downloadBuffer(info.downloadUrl);
+      } catch (err) {
+        if (localDevPack) {
+          gzBuffer = fs.readFileSync(localDevPack);
+        } else {
+          throw err;
+        }
+      }
+    } else if (localDevPack) {
+      gzBuffer = fs.readFileSync(localDevPack);
+    } else {
+      throw new Error(`No download URL configured for ${info.name}`);
+    }
+
+    const parsed = parseAndValidatePack(gzBuffer);
+
+    const destDir = path.dirname(destPath);
+    fs.mkdirSync(destDir, { recursive: true });
+    const tmpPath = `${destPath}.tmp`;
+    fs.writeFileSync(tmpPath, gzBuffer);
+    fs.renameSync(tmpPath, destPath);
+
+    for (const [bId, chapters] of Object.entries(parsed)) {
+      this.cache.set(`${id}:${bId}`, chapters);
+    }
+  }
+
+  public deleteDownloadedTranslation(id: string): boolean {
+    const info = this.catalogById.get(id);
+    if (info?.bundled) {
+      return false;
+    }
+    const destPath = this.getDownloadedPackPath(id);
+    if (destPath && fs.existsSync(destPath)) {
+      fs.unlinkSync(destPath);
+    }
+    for (let i = 1; i <= 66; i++) {
+      this.cache.delete(`${id}:${i}`);
+    }
+    return true;
   }
 
   public findBook(query: string): BookMetadata | undefined {
@@ -269,17 +416,34 @@ export class BibleManager {
     }
 
     const filePath = path.join(this.dataDir, 'translations', translation, `${bookId}.json`);
-    if (!fs.existsSync(filePath)) {
-      return [];
+    if (fs.existsSync(filePath)) {
+      try {
+        const data = JSON.parse(fs.readFileSync(filePath, 'utf8')) as string[][];
+        this.cache.set(key, data);
+        return data;
+      } catch {
+        return [];
+      }
     }
 
-    try {
-      const data = JSON.parse(fs.readFileSync(filePath, 'utf8')) as string[][];
-      this.cache.set(key, data);
-      return data;
-    } catch {
-      return [];
+    // Check downloaded single-file gzip pack in globalStorageUri (or dev fallback packs/)
+    const packPath = this.getDownloadedPackPath(translation);
+    const resolvedPack =
+      packPath && fs.existsSync(packPath) ? packPath : this.getDevPackPath(translation);
+
+    if (resolvedPack && fs.existsSync(resolvedPack)) {
+      try {
+        const bundle = parseAndValidatePack(fs.readFileSync(resolvedPack));
+        for (const [bId, chapters] of Object.entries(bundle)) {
+          this.cache.set(`${translation}:${bId}`, chapters);
+        }
+        return this.cache.get(key) || [];
+      } catch {
+        return [];
+      }
     }
+
+    return [];
   }
 
   public loadBookCrossReferences(bookId: number): Record<string, Record<string, CrossReferenceGroup[]>> {
@@ -352,6 +516,9 @@ export class BibleManager {
 
     const crossReferences = this.getCrossReferences(bookId, chapter, verse);
     const resolvedCrossReferences = this.resolveCrossReferences(bookId, chapter, verse, translation, 12);
+    const primaryMeta = this.catalogById.get(translation);
+    const parallelMeta =
+      dualTranslation && dualTranslation !== translation ? this.catalogById.get(dualTranslation) : undefined;
 
     return {
       bookId,
@@ -361,8 +528,11 @@ export class BibleManager {
       verse,
       text,
       translation,
+      translationName: primaryMeta ? `${primaryMeta.language} — ${primaryMeta.name}` : translation.toUpperCase(),
+      direction: primaryMeta?.direction || 'ltr',
       parallelText,
       parallelTranslation: dualTranslation && dualTranslation !== translation ? dualTranslation : undefined,
+      parallelTranslationName: parallelMeta ? parallelMeta.shortName : dualTranslation?.toUpperCase(),
       crossReferences: crossReferences.length > 0 ? crossReferences : undefined,
       resolvedCrossReferences: resolvedCrossReferences.length > 0 ? resolvedCrossReferences : undefined,
       chapterVerses: chapterVerses

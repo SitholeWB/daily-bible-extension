@@ -70,12 +70,25 @@ export class BibleReaderView {
             this.update();
             break;
           case 'setPrimaryTranslation':
+            if (message.translation === '__more__') {
+              vscode.commands.executeCommand('dailyBread.switchTranslation', 'primary');
+              this.update();
+              break;
+            }
             this.primaryTranslation = message.translation;
             this.update();
             break;
           case 'setParallelTranslation':
+            if (message.translation === '__more__') {
+              vscode.commands.executeCommand('dailyBread.switchTranslation', 'parallel');
+              this.update();
+              break;
+            }
             this.parallelTranslation = message.translation;
             this.update();
+            break;
+          case 'openTranslationSwitcher':
+            vscode.commands.executeCommand('dailyBread.switchTranslation', message.mode || 'primary');
             break;
           case 'copyVerse': {
             const vData = this.bibleManager.getVerse(
@@ -279,6 +292,30 @@ export class BibleReaderView {
   }
 
   private getHtmlContent(book: BookMetadata): string {
+    if (!this.bibleManager.isTranslationInstalled(this.primaryTranslation)) {
+      this.primaryTranslation = 'kjv';
+    }
+    if (!this.bibleManager.isTranslationInstalled(this.parallelTranslation)) {
+      this.parallelTranslation = 'zulu';
+    }
+
+    const installedTranslations = this.bibleManager.getInstalledTranslations();
+    const primaryInfo = this.bibleManager.getTranslationInfo(this.primaryTranslation);
+    const parallelInfo = this.bibleManager.getTranslationInfo(this.parallelTranslation);
+    const primaryDir = primaryInfo?.direction || 'ltr';
+
+    const primaryOptionsHtml =
+      installedTranslations
+        .map(t => `<option value="${t.id}" ${this.primaryTranslation === t.id ? 'selected' : ''}>${t.language} (${t.shortName})</option>`)
+        .join('') +
+      `<option value="__more__">🌐 Download More Translations...</option>`;
+
+    const parallelOptionsHtml =
+      installedTranslations
+        .map(t => `<option value="${t.id}" ${this.parallelTranslation === t.id ? 'selected' : ''}>Parallel: ${t.language} (${t.shortName})</option>`)
+        .join('') +
+      `<option value="__more__">🌐 Download More Translations...</option>`;
+
     const primaryVerses = this.bibleManager.getChapter(
       this.currentBookId,
       this.currentChapter,
@@ -792,10 +829,9 @@ export class BibleReaderView {
     <div class="view-controls">
       <label for="primary-trans" style="font-size:12px;opacity:0.8;">Primary:</label>
       <select id="primary-trans" onchange="changePrimary(this.value)">
-        <option value="kjv" ${this.primaryTranslation === 'kjv' ? 'selected' : ''}>English (KJB / KJV)</option>
-        <option value="web" ${this.primaryTranslation === 'web' ? 'selected' : ''}>English (WEB)</option>
-        <option value="zulu" ${this.primaryTranslation === 'zulu' ? 'selected' : ''}>isiZulu 1959</option>
+        ${primaryOptionsHtml}
       </select>
+      <button class="btn" onclick="openTranslationLibrary()" title="Search, Switch &amp; Download More Offline Bible Translations">🌐 More</button>
 
       <button class="btn ${this.isParallel ? 'btn-primary' : ''}" onclick="toggleParallel()" title="Toggle Side-by-Side Dual Translation View">
         ${this.isParallel ? 'Parallel: ON' : 'Parallel: OFF'}
@@ -803,9 +839,7 @@ export class BibleReaderView {
 
       ${this.isParallel ? `
         <select id="parallel-trans" onchange="changeParallel(this.value)">
-          <option value="zulu" ${this.parallelTranslation === 'zulu' ? 'selected' : ''}>Parallel: isiZulu</option>
-          <option value="web" ${this.parallelTranslation === 'web' ? 'selected' : ''}>Parallel: WEB</option>
-          <option value="kjv" ${this.parallelTranslation === 'kjv' ? 'selected' : ''}>Parallel: KJB</option>
+          ${parallelOptionsHtml}
         </select>
       ` : ''}
 
@@ -824,17 +858,17 @@ export class BibleReaderView {
   <div class="content-area">
     <div class="chapter-hero">
       <h1>${bookDisplayName}</h1>
-      <div class="subtitle">Chapter ${this.currentChapter} of ${totalChapters}</div>
+      <div class="subtitle">Chapter ${this.currentChapter} of ${totalChapters} • ${primaryInfo ? `${primaryInfo.language} — ${primaryInfo.name}` : this.primaryTranslation.toUpperCase()}</div>
     </div>
 
     ${this.isParallel ? `
       <div class="parallel-headers">
-        <div>${this.primaryTranslation.toUpperCase()} Translation</div>
-        <div>${this.parallelTranslation.toUpperCase()} Translation</div>
+        <div>${primaryInfo ? `${primaryInfo.language} (${primaryInfo.shortName})` : this.primaryTranslation.toUpperCase()}</div>
+        <div>${parallelInfo ? `${parallelInfo.language} (${parallelInfo.shortName})` : this.parallelTranslation.toUpperCase()}</div>
       </div>
     ` : ''}
 
-    <div class="verses-container">
+    <div class="verses-container" dir="${primaryDir}">
       ${versesHtml}
     </div>
 
@@ -870,6 +904,10 @@ export class BibleReaderView {
 
     function changeParallel(val) {
       vscode.postMessage({ command: 'setParallelTranslation', translation: val });
+    }
+
+    function openTranslationLibrary() {
+      vscode.postMessage({ command: 'openTranslationSwitcher', mode: 'primary' });
     }
 
     function copyVerse(bookId, chapter, verse, translation) {

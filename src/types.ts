@@ -1,4 +1,18 @@
-export type Translation = 'zulu' | 'web' | 'kjv';
+export type Translation = string;
+
+export interface TranslationInfo {
+  id: string;
+  languageCode: string;
+  language: string;
+  name: string;
+  shortName: string;
+  direction: 'ltr' | 'rtl';
+  copyright: string;
+  bundled: boolean;
+  sizeKB: number;
+  region?: string;
+  downloadUrl?: string;
+}
 
 export interface BookMetadata {
   id: number;
@@ -41,8 +55,11 @@ export interface VerseData {
   verse: number;
   text: string;
   translation: Translation;
+  translationName?: string;
+  direction?: 'ltr' | 'rtl';
   parallelText?: string;
   parallelTranslation?: Translation;
+  parallelTranslationName?: string;
   crossReferences?: CrossReferenceGroup[];
   resolvedCrossReferences?: ResolvedCrossReference[];
   chapterVerses?: string[];

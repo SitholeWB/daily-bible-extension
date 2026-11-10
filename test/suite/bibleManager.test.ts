@@ -1,4 +1,6 @@
 import * as assert from 'assert';
+import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import { BibleManager } from '../../src/bibleManager';
 
@@ -60,6 +62,33 @@ describe('BibleManager Data & Translation Integrity Tests', () => {
     const randVerse = manager.getRandomVerse('peace', 'zulu');
     assert.ok(randVerse);
     assert.ok(randVerse.text.length > 0);
+  });
+
+  it('should bundle only kjv and zulu by default and expose downloadable catalog', async () => {
+    const tmpStorage = fs.mkdtempSync(path.join(os.tmpdir(), 'daily-bible-test-'));
+    try {
+      const extPath = path.resolve(__dirname, '../../');
+      const m = new BibleManager(extPath, tmpStorage);
+      const catalog = m.getCatalog();
+      const bundled = catalog.filter(c => c.bundled).map(c => c.id).sort();
+      assert.deepStrictEqual(bundled, ['kjv', 'zulu']);
+      assert.ok(catalog.length >= 20, 'Expected rich downloadable translation catalog');
+
+      assert.strictEqual(m.isTranslationInstalled('kjv'), true);
+      assert.strictEqual(m.isTranslationInstalled('zulu'), true);
+      assert.strictEqual(m.isTranslationInstalled('web'), false);
+
+      await m.downloadTranslation('web');
+      assert.strictEqual(m.isTranslationInstalled('web'), true);
+      const webJohn = m.getVerse(43, 3, 16, 'web');
+      assert.ok(webJohn?.text.includes('God so loved the world'));
+
+      assert.strictEqual(m.deleteDownloadedTranslation('kjv'), false);
+      assert.strictEqual(m.deleteDownloadedTranslation('web'), true);
+      assert.strictEqual(m.isTranslationInstalled('web'), false);
+    } finally {
+      fs.rmSync(tmpStorage, { recursive: true, force: true });
+    }
   });
 });
 

@@ -1,9 +1,9 @@
 # Daily Bible — Offline & Scripture Status Bar 📖
 
 [![CI](https://github.com/SitholeWB/daily-bible-extension/actions/workflows/ci.yml/badge.svg)](https://github.com/SitholeWB/daily-bible-extension/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-1.3.4-blue.svg)](https://marketplace.visualstudio.com)
-[![Offline](https://img.shields.io/badge/network-100%25%20offline-success.svg)](https://github.com)
-[![Translations](https://img.shields.io/badge/translations-isiZulu%20%7C%20WEB%20%7C%20KJV-purple.svg)](https://github.com)
+[![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)](https://marketplace.visualstudio.com)
+[![Offline](https://img.shields.io/badge/network-100%25%20offline%20core-success.svg)](https://github.com)
+[![Translations](https://img.shields.io/badge/translations-59%20languages%20%26%20versions-purple.svg)](https://github.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > **"Nginamandla ukwenza konke ngaye ongiqinisayo." — KwabaseFilipi 4:13**  
@@ -11,23 +11,30 @@
 
 **Daily Bible** is a fast, 100% offline, privacy-first VS Code extension designed to bring encouraging Holy Scripture directly into your coding environment. Glance at inspiring verses in your status bar while in the flow of programming, or launch the immersive in-editor Bible reader with parallel translations, chapter navigation, and bookmarking.
 
+### 📸 Preview
+
+**Scrollable Hover Reader (Active Verse, Bookmarking, Full Chapter & Cross-References)**  
+![Hover Scripture Reader Tooltip](media/screenshot-hover.png)
+
+**Quick Action Options Menu (`Ctrl+Alt+B` / Click Status Bar)**  
+![Daily Bible Options Menu](media/screenshot-options.png)
+
 ---
 
 ## ✨ Core Philosophy
 
-1. **100% Offline-First & Zero-Login**: No API keys, no user accounts, no telemetry, and zero network calls. All translations and curated topics are bundled locally. Complete privacy.
-2. **First-Class isiZulu & English**: Includes the full **isiZulu Bible (IBhayibheli Elingcwele / 1959 Translation)** with authentic Zulu book names (*USenesisi, AmaHubo, UMathewu, KwabaseRoma, IsAmbulo*), alongside clean modern English (**World English Bible — WEB**) and traditional poetic English (**King James Version — KJV**).
+1. **100% Offline-First Core & Zero-Login**: **English (KJV)** and **isiZulu (1959)** are bundled locally with zero network calls, zero telemetry, and no accounts required.
+2. **Searchable In-Editor Translation Library (59+ Versions)**: Browse, search, and download additional translations on demand (WEB, Berean Standard Bible, Spanish, Portuguese, French, Chinese, Swahili, Shona, German, Hindi, Arabic, Russian, Korean, and more) — downloaded once (~1.2 MB each) and stored locally for permanent offline use.
 3. **From Glanceable to Immersive**: Subtle status bar scripture that rotates gently throughout your workday, expanding to a full dual-view reader when you want to dive deep.
 
 ---
 
 ## 🚀 Key Features
 
-### 1. 🇿🇦 Multilingual Offline Scripture
-- **isiZulu**: *IBhayibheli Elingcwele (1959)* with full support for authentic Zulu names and abbreviations (`USenesisi`, `AmaHubo`, `Hubo`, `UMathewu`, `KwabaseFilipi`, `IsAmbulo`).
-- **World English Bible (WEB)**: Contemporary, easy-to-read modern public-domain English.
-- **King James Version (KJV)**: Traditional, majestic 1611/1769 English.
-- Instant 1-click translation switching right from the status bar or reader.
+### 1. 🌍 Multilingual Offline Scripture & Searchable Library
+- **Default Offline Bundled**: **King James Version (KJV)** and **isiZulu (*IBhayibheli Elingcwele 1959*)** with authentic Zulu book names (`USenesisi`, `AmaHubo`, `Hubo`, `UMathewu`, `KwabaseFilipi`, `IsAmbulo`).
+- **57+ Downloadable Offline Translations**: Including **WEB**, **BSB**, **ASV**, **Swahili**, **Shona**, **Chichewa**, **Yorùbá**, **Hausa**, **Spanish**, **Portuguese**, **French**, **Chinese (Simplified & Traditional)**, **German**, **Italian**, **Russian**, **Hindi**, **Arabic**, **Hebrew**, **Korean**, and more.
+- **In-Editor Translation Switcher**: Search by language, version name, or region, and download or switch Primary & Parallel translations in one click.
 
 ### 2. ✝ Glanceable Status Bar Integration
 - Rotating scripture with customizable prefix icon: `✝` (cross), `📖` (book), `🕊️` (dove), or none.
@@ -84,7 +91,7 @@ Adds a dedicated Holy Bible icon to the VS Code Activity Bar with three collapsi
 | `dailyBread.bookmarkCurrent`| — | Bookmark current status bar verse |
 | `dailyBread.showBookmarks` | — | View and filter saved favorites |
 | `dailyBread.selectTopic` | — | Choose active scripture theme / mood |
-| `dailyBread.switchTranslation` | — | Toggle between isiZulu, WEB, and KJV |
+| `dailyBread.switchTranslation` | — | Open searchable in-editor translation library & offline downloader |
 | `dailyBread.copyVerse` | — | Copy current verse and citation to clipboard |
 | `dailyBread.exportBookmarks` | — | Export bookmarks to Markdown or JSON |
 | `dailyBread.randomChapter` | — | Open a random chapter from scripture |
@@ -97,8 +104,8 @@ Configure via VS Code Settings (`Ctrl+,` or `Cmd+,`, search for `dailyBread`):
 
 | Setting | Default | Options | Description |
 | :--- | :--- | :--- | :--- |
-| `dailyBread.translation` | `"kjv"` | `"kjv"`, `"web"`, `"zulu"` | Primary translation (Default: English King James Bible / Version - KJB/KJV) |
-| `dailyBread.dualTranslation`| `"none"` | `"none"`, `"zulu"`, `"web"`, `"kjv"` | Secondary parallel translation in reader & hover |
+| `dailyBread.translation` | `"kjv"` | `"kjv"`, `"zulu"`, or any downloaded translation ID | Primary translation (Default offline: KJV & isiZulu; download 57+ more via Switch Translation) |
+| `dailyBread.dualTranslation`| `"none"` | `"none"`, `"zulu"`, `"kjv"`, or any downloaded ID | Secondary parallel translation in reader & hover |
 | `dailyBread.displayMode` | `"preview"` | `"compact"`, `"preview"`, `"full"` | Status bar layout format |
 | `dailyBread.icon` | `"cross"` | `"cross"`, `"book"`, `"dove"`, `"none"` | Status bar icon prefix |
 | `dailyBread.rotationSchedule` | `"15min"` | `"manual"`, `"5min"`, `"15min"`, `"30min"`, `"60min"`, `"onEditorOpen"` | Timer frequency for rotating scripture |
@@ -123,11 +130,11 @@ The search bar (`dailyBread.jumpTo`) supports both English and isiZulu book name
 
 ## 🛡️ Privacy & Offline Guarantee
 
-Daily Bible runs **100% locally on your machine**. It contains **no telemetry, no tracking, and requires no internet access whatsoever**. All 66 books of the Holy Bible in isiZulu (1959), WEB, and KJV are packaged right into the extension bundle.
+Daily Bible runs **100% locally on your machine** with **no telemetry and no tracking**. **English (KJV)** and **isiZulu (1959)** are packaged directly inside the extension bundle for zero-internet startup. Network access is **only** used when you explicitly click **Download** inside the in-editor Translation Library to fetch an optional language pack (saved locally for permanent offline use).
 
 ---
 
 ## 📜 License
 
-MIT License. Holy Bible texts used are in the public domain (IBhayibheli Elingcwele 1959, World English Bible, King James Version).
+MIT License. Bundled and downloadable Holy Bible texts are Public Domain or Openly Licensed (Creative Commons / Biblica Open) as noted per translation in the in-editor Translation Library.
 
