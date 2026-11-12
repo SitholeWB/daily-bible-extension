@@ -4,6 +4,7 @@ import '../models/bible_models.dart';
 import '../services/bible_repository.dart';
 import '../services/storage_service.dart';
 import 'cross_ref_panel.dart';
+import 'feedback_dialog.dart';
 import 'study_note_dialog.dart';
 import 'translations_panel.dart';
 
@@ -187,6 +188,16 @@ class _AppShellState extends State<AppShell> {
     );
   }
 
+  Future<void> _openFeedbackDialog() async {
+    await showDialog<void>(
+      context: context,
+      builder: (_) => FeedbackDialog(
+        storage: widget.storage,
+        activeTranslation: widget.storage.translationId,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -251,6 +262,19 @@ class _AppShellState extends State<AppShell> {
                 label: Text('Packs'),
               ),
             ],
+            trailing: Expanded(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: IconButton(
+                    tooltip: 'Send Feedback',
+                    icon: const Icon(Icons.feedback_outlined),
+                    onPressed: _openFeedbackDialog,
+                  ),
+                ),
+              ),
+            ),
           ),
           const VerticalDivider(width: 1),
 
@@ -481,6 +505,13 @@ class _AppShellState extends State<AppShell> {
             tooltip: 'Export Notes & Bookmarks Backup',
             icon: const Icon(Icons.save_alt, size: 19),
             onPressed: _exportBackup,
+          ),
+
+          // Feedback
+          IconButton(
+            tooltip: 'Send Feedback',
+            icon: const Icon(Icons.feedback_outlined, size: 19),
+            onPressed: _openFeedbackDialog,
           ),
 
           // Study Inspector Toggle

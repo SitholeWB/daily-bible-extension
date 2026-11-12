@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:daily_bread/models/bible_models.dart';
+import 'package:daily_bread/ui/feedback_dialog.dart';
 
 void main() {
   test('BibleBook displays isiZulu name when zulu translation is active', () {
@@ -33,5 +34,10 @@ void main() {
     expect(updated.id, 'n1');
     expect(updated.content, 'Revised reflection');
     expect(updated.verseRef, const VerseRef(bookId: 43, chapter: 3, verse: 16));
+  });
+
+  test('FeedbackDialog decodes Discord webhook URL cleanly', () {
+    final url = FeedbackDialog.decodeWebhookUrl();
+    expect(url.startsWith('https://discord.com/api/webhooks/'), isTrue);
   });
 }

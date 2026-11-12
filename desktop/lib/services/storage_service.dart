@@ -14,6 +14,9 @@ class StorageService {
   ThemeMode themeMode = ThemeMode.system;
   int lastBookId = 43; // John
   int lastChapter = 3;
+  String feedbackAuthor = '';
+  String feedbackContact = '';
+  int feedbackLastSentMs = 0;
 
   File? _dataFile;
 
@@ -29,6 +32,9 @@ class StorageService {
         fontSize = ((json['fontSize'] ?? 17.0) as num).toDouble();
         lastBookId = (json['lastBookId'] ?? 43) as int;
         lastChapter = (json['lastChapter'] ?? 3) as int;
+        feedbackAuthor = (json['feedbackAuthor'] ?? '') as String;
+        feedbackContact = (json['feedbackContact'] ?? '') as String;
+        feedbackLastSentMs = (json['feedbackLastSentMs'] ?? 0) as int;
 
         final themeStr = (json['themeMode'] ?? 'system') as String;
         themeMode = switch (themeStr) {
@@ -64,6 +70,9 @@ class StorageService {
       'themeMode': themeStr,
       'lastBookId': lastBookId,
       'lastChapter': lastChapter,
+      'feedbackAuthor': feedbackAuthor,
+      'feedbackContact': feedbackContact,
+      'feedbackLastSentMs': feedbackLastSentMs,
       'bookmarks': bookmarks.map((b) => b.toJson()).toList(),
       'notes': notes.map((n) => n.toJson()).toList(),
     };
