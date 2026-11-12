@@ -117,5 +117,54 @@ describe('BookmarksManager Tests', () => {
     assert.strictEqual(bookmarksManager.getBookmarks().length, 1);
     assert.strictEqual(bookmarksManager.getBookmarks()[0].bookName, 'USenesisi');
   });
+
+  it('should export full backup, txt, csv, html and restore from backup and markdown', async () => {
+    const verse: VerseData = {
+      bookId: 43,
+      bookName: 'John',
+      zuluBookName: 'UJohane',
+      chapter: 3,
+      verse: 16,
+      text: 'For God so loved the world, "truly".',
+      translation: 'engmsb'
+    };
+
+    await bookmarksManager.addBookmark(verse, 'Sermon intro', ['gospel', 'grace']);
+
+    const txt = bookmarksManager.exportBookmarksText();
+    assert.ok(txt.includes('John 3:16 (ENGMSB)'));
+    assert.ok(txt.includes('Note: Sermon intro'));
+
+    const csv = bookmarksManager.exportBookmarksCsv();
+    assert.ok(csv.startsWith('Book,Chapter,Verse,Translation,Text,Note,Tags,SavedDate'));
+    assert.ok(csv.includes('""truly""'));
+
+    const html = bookmarksManager.exportBookmarksHtml();
+    assert.ok(html.includes('<!DOCTYPE html>'));
+    assert.ok(html.includes('John 3:16'));
+
+    const backupJson = bookmarksManager.exportFullBackup(
+      { translation: 'engmsb', fontSize: 18 },
+      ['kjv', 'zulu', 'engmsb']
+    );
+
+    // Restore into a clean manager
+    const mdExport = bookmarksManager.exportBookmarksMarkdown();
+    await bookmarksManager.removeBookmark('43:3:16:engmsb');
+    assert.strictEqual(bookmarksManager.getBookmarks().length, 0);
+
+    const restored = await bookmarksManager.importBackup(backupJson);
+    assert.strictEqual(restored.bookmarksImported, 1);
+    assert.strictEqual(restored.settings?.translation, 'engmsb');
+    assert.deepStrictEqual(restored.installedTranslations, ['kjv', 'zulu', 'engmsb']);
+
+    // Re-import from Markdown after removing
+    await bookmarksManager.removeBookmark('43:3:16:engmsb');
+    const mdCount = await bookmarksManager.importBookmarksMarkdown(mdExport, name =>
+      name === 'John' ? { id: 43, name: 'John' } : undefined
+    );
+    assert.strictEqual(mdCount, 1);
+    assert.strictEqual(bookmarksManager.getBookmarks()[0].note, 'Sermon intro');
+  });
 });
 

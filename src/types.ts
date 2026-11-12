@@ -102,3 +102,12 @@ export interface ExtensionSettings {
   fontSize: number; // 0 = match editor font size
   fontFamily: string; // 'editor' | 'serif' | 'sans-serif' | 'monospace' | 'system'
 }
+
+export interface DailyBibleBackup {
+  format: 'daily-bible-backup';
+  version: number;
+  exportedAt: string;
+  bookmarks: Bookmark[];
+  settings?: Partial<ExtensionSettings>;
+  installedTranslations?: string[];
+}

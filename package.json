@@ -2,7 +2,7 @@
   "name": "daily-bread-statusbar",
   "displayName": "Daily Bible — Offline & Scripture Status Bar",
   "description": "100% Offline Holy Bible with glanceable status bar scriptures, parallel dual-reader, bookmarks, and curated mood themes.",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "publisher": "sitholewb",
   "icon": "media/icon.png",
   "repository": {
@@ -57,6 +57,11 @@
         {
           "id": "dailyBreadTopics",
           "name": "Curated Topics & Moods",
+          "visibility": "visible"
+        },
+        {
+          "id": "dailyBreadTools",
+          "name": "Quick Actions, Translations & Backup",
           "visibility": "visible"
         }
       ]
@@ -134,8 +139,13 @@
       },
       {
         "command": "dailyBread.exportBookmarks",
-        "title": "Daily Bible: Export Bookmarks (Markdown / JSON)",
+        "title": "Daily Bible: Export Bookmarks & Backup (JSON / Markdown)",
         "icon": "$(export)"
+      },
+      {
+        "command": "dailyBread.importBookmarks",
+        "title": "Daily Bible: Import Bookmarks & Restore Backup",
+        "icon": "$(cloud-upload)"
       },
       {
         "command": "dailyBread.deleteBookmarkItem",
@@ -174,6 +184,11 @@
       "view/title": [
         {
           "command": "dailyBread.exportBookmarks",
+          "when": "view == dailyBreadBookmarks",
+          "group": "navigation"
+        },
+        {
+          "command": "dailyBread.importBookmarks",
           "when": "view == dailyBreadBookmarks",
           "group": "navigation"
         },

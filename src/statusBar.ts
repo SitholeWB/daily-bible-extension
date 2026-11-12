@@ -113,14 +113,14 @@ export class StatusBarController {
 
     md.appendMarkdown(
       `[$(sync) Next Verse](command:dailyBread.nextVerse "Advance to next verse") &nbsp;&bull;&nbsp; ` +
-      `[${pauseLabel}](command:dailyBread.togglePauseRotation "${pauseTooltip}") &nbsp;&bull;&nbsp; ` +
       `[$(book) Read In Editor](command:dailyBread.readChapter "Open full in-editor reader tab") &nbsp;&bull;&nbsp; ` +
-      `[🔗 Cross Refs Directory](command:dailyBread.showCrossReferences "View full cross-reference list") &nbsp;&bull;&nbsp; ` +
       `[${bookmarkLabel}](${bookmarkCmd} "${bookmarkTooltip}") &nbsp;&bull;&nbsp; ` +
+      `[$(globe) Switch Translation](command:dailyBread.switchTranslation "Search, switch, or download Bible translations") &nbsp;&bull;&nbsp; ` +
+      `[$(search) Search / Jump](command:dailyBread.jumpTo "Search any scripture") &nbsp;&bull;&nbsp; ` +
+      `[🔗 Cross Refs](command:dailyBread.showCrossReferences "View full cross-reference list") &nbsp;&bull;&nbsp; ` +
+      `[${pauseLabel}](command:dailyBread.togglePauseRotation "${pauseTooltip}") &nbsp;&bull;&nbsp; ` +
       `[$(text-size) Font Size](command:dailyBread.changeFontSize "Adjust scripture font size") &nbsp;&bull;&nbsp; ` +
-      `[$(copy) Copy](command:dailyBread.copyVerse "Copy verse to clipboard") &nbsp;&bull;&nbsp; ` +
-      `[$(globe) Switch Translation](command:dailyBread.switchTranslation "Change Bible translation") &nbsp;&bull;&nbsp; ` +
-      `[$(search) Search / Jump](command:dailyBread.jumpTo "Search any scripture")\n\n`
+      `[$(copy) Copy](command:dailyBread.copyVerse "Copy verse to clipboard")\n\n`
     );
 
     md.appendMarkdown(`---\n\n`);
@@ -218,14 +218,14 @@ export class StatusBarController {
     md.appendMarkdown(
       `### 🧭 Quick Navigation\n\n` +
       `[$(sync) Next Verse](command:dailyBread.nextVerse "Advance to next verse") &nbsp;&bull;&nbsp; ` +
-      `[${pauseLabel}](command:dailyBread.togglePauseRotation "${pauseTooltip}") &nbsp;&bull;&nbsp; ` +
       `[$(book) Read In Editor](command:dailyBread.readChapter "Open full in-editor reader tab") &nbsp;&bull;&nbsp; ` +
-      `[🔗 Cross Refs Directory](command:dailyBread.showCrossReferences "View full cross-reference list") &nbsp;&bull;&nbsp; ` +
       `[${bookmarkLabel}](${bookmarkCmd} "${bookmarkTooltip}") &nbsp;&bull;&nbsp; ` +
+      `[$(globe) Switch Translation](command:dailyBread.switchTranslation "Search, switch, or download Bible translations") &nbsp;&bull;&nbsp; ` +
+      `[$(search) Search / Jump](command:dailyBread.jumpTo "Search any scripture") &nbsp;&bull;&nbsp; ` +
+      `[🔗 Cross Refs](command:dailyBread.showCrossReferences "View full cross-reference list") &nbsp;&bull;&nbsp; ` +
+      `[${pauseLabel}](command:dailyBread.togglePauseRotation "${pauseTooltip}") &nbsp;&bull;&nbsp; ` +
       `[$(text-size) Font Size](command:dailyBread.changeFontSize "Adjust scripture font size") &nbsp;&bull;&nbsp; ` +
-      `[$(copy) Copy Verse](command:dailyBread.copyVerse "Copy verse to clipboard") &nbsp;&bull;&nbsp; ` +
-      `[$(globe) Switch Translation](command:dailyBread.switchTranslation "Change Bible translation") &nbsp;&bull;&nbsp; ` +
-      `[$(search) Search / Jump](command:dailyBread.jumpTo "Search any scripture")\n`
+      `[$(copy) Copy Verse](command:dailyBread.copyVerse "Copy verse to clipboard")\n`
     );
 
     return md;

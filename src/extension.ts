@@ -1,3 +1,5 @@
+import * as os from 'os';
+import * as path from 'path';
 import * as vscode from 'vscode';
 import { BibleManager } from './bibleManager';
 import { BookmarksManager } from './bookmarks';
@@ -7,6 +9,7 @@ import { StatusBarController } from './statusBar';
 import { BibleExplorerProvider } from './sidebar/bibleExplorerProvider';
 import { BookmarksProvider, BookmarkTreeItem } from './sidebar/bookmarksProvider';
 import { TopicsProvider } from './sidebar/topicsProvider';
+import { ToolsProvider } from './sidebar/toolsProvider';
 import { Bookmark, ExtensionSettings, RotationSchedule, StatusDisplayMode, StatusIconType, Translation, VerseData } from './types';
 
 let bibleManager: BibleManager;
@@ -28,6 +31,9 @@ export function activate(context: vscode.ExtensionContext) {
 
   const topicsProvider = new TopicsProvider(bibleManager);
   vscode.window.registerTreeDataProvider('dailyBreadTopics', topicsProvider);
+
+  const toolsProvider = new ToolsProvider(bibleManager, () => isRotationPaused);
+  vscode.window.registerTreeDataProvider('dailyBreadTools', toolsProvider);
 
   // Settings
   const getSettings = (): ExtensionSettings => {
@@ -213,6 +219,7 @@ export function activate(context: vscode.ExtensionContext) {
         setupRotation();
         BibleReaderView.updateCurrent();
         TranslationSwitcherView.updateCurrent();
+        toolsProvider.refresh();
         const settings = getSettings();
         if (currentVerse) {
           const dual = settings.dualTranslation !== 'none' ? settings.dualTranslation : undefined;
@@ -582,29 +589,240 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
-  // 13. Export Bookmarks
+  // 13. Export Bookmarks & Full Backup
   context.subscriptions.push(
     vscode.commands.registerCommand('dailyBread.exportBookmarks', async () => {
-      const format = await vscode.window.showQuickPick(
+      const choice = await vscode.window.showQuickPick(
         [
-          { label: 'Markdown Document (.md)', format: 'md' },
-          { label: 'JSON Dataset (.json)', format: 'json' }
+          {
+            label: '$(archive) Full Backup (.json)',
+            description: '✅ Re-importable — Bookmarks, notes, tags, settings & offline translations',
+            detail: 'Best for moving to another computer or restoring everything later',
+            format: 'backup' as const,
+            reimportable: true
+          },
+          {
+            label: '$(json) Bookmarks Only (.json)',
+            description: '✅ Re-importable — Saved bookmarks, notes & tags',
+            detail: 'Portable JSON list of your saved verses',
+            format: 'json' as const,
+            reimportable: true
+          },
+          {
+            label: '$(markdown) Markdown Study Document (.md)',
+            description: '✅ Re-importable — Formatted study doc (Obsidian / VS Code / Notion)',
+            detail: 'Readable Markdown with verses, notes & tags that can also be imported back',
+            format: 'md' as const,
+            reimportable: true
+          },
+          {
+            label: '$(file-text) Plain Text (.txt)',
+            description: '⚠️ Export-only (cannot be imported back)',
+            detail: 'Clean plain text for printing, emails, or Word/Notepad',
+            format: 'txt' as const,
+            reimportable: false
+          },
+          {
+            label: '$(table) CSV Spreadsheet (.csv)',
+            description: '⚠️ Export-only (cannot be imported back)',
+            detail: 'Spreadsheet table for Excel, Google Sheets, or LibreOffice Calc',
+            format: 'csv' as const,
+            reimportable: false
+          },
+          {
+            label: '$(globe) Styled HTML Study Sheet (.html)',
+            description: '⚠️ Export-only (cannot be imported back)',
+            detail: 'Formatted webpage ready to open in a browser or print to PDF',
+            format: 'html' as const,
+            reimportable: false
+          }
         ],
-        { placeHolder: 'Choose Export Format' }
+        { placeHolder: 'Choose export format (JSON & Markdown can be imported back; TXT/CSV/HTML are export-only)' }
       );
 
-      if (!format) return;
+      if (!choice) return;
 
-      const content =
-        format.format === 'md'
-          ? bookmarksManager.exportBookmarksMarkdown()
-          : bookmarksManager.exportBookmarksJson();
+      const dateTag = new Date().toISOString().slice(0, 10);
+      let content = '';
+      let defaultName = '';
+      let filters: Record<string, string[]> = {};
 
-      const doc = await vscode.workspace.openTextDocument({
-        content,
-        language: format.format === 'md' ? 'markdown' : 'json'
+      if (choice.format === 'backup') {
+        const installedIds = bibleManager.getInstalledTranslations().map(t => t.id);
+        content = bookmarksManager.exportFullBackup(getSettings(), installedIds);
+        defaultName = `daily-bible-backup-${dateTag}.json`;
+        filters = { 'Daily Bible Backup (JSON)': ['json'] };
+      } else if (choice.format === 'md') {
+        content = bookmarksManager.exportBookmarksMarkdown();
+        defaultName = `daily-bible-bookmarks-${dateTag}.md`;
+        filters = { 'Markdown Document': ['md'] };
+      } else if (choice.format === 'txt') {
+        content = bookmarksManager.exportBookmarksText();
+        defaultName = `daily-bible-bookmarks-${dateTag}.txt`;
+        filters = { 'Plain Text': ['txt'] };
+      } else if (choice.format === 'csv') {
+        content = bookmarksManager.exportBookmarksCsv();
+        defaultName = `daily-bible-bookmarks-${dateTag}.csv`;
+        filters = { 'CSV Spreadsheet': ['csv'] };
+      } else if (choice.format === 'html') {
+        content = bookmarksManager.exportBookmarksHtml();
+        defaultName = `daily-bible-bookmarks-${dateTag}.html`;
+        filters = { 'HTML Document': ['html'] };
+      } else {
+        content = bookmarksManager.exportBookmarksJson();
+        defaultName = `daily-bible-bookmarks-${dateTag}.json`;
+        filters = { 'JSON File': ['json'] };
+      }
+
+      const defaultFolder =
+        vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0
+          ? vscode.workspace.workspaceFolders[0].uri.fsPath
+          : os.homedir();
+
+      const saveUri = await vscode.window.showSaveDialog({
+        defaultUri: vscode.Uri.file(path.join(defaultFolder, defaultName)),
+        filters,
+        saveLabel: 'Export'
       });
-      await vscode.window.showTextDocument(doc);
+
+      if (saveUri) {
+        await vscode.workspace.fs.writeFile(saveUri, Buffer.from(content, 'utf8'));
+        const note = choice.reimportable
+          ? ''
+          : ' (Export-only format — cannot be imported back. Use .json or .md for backups.)';
+        const action = await vscode.window.showInformationMessage(
+          `✅ Exported to ${path.basename(saveUri.fsPath)}${note}`,
+          'Open File'
+        );
+        if (action === 'Open File') {
+          const doc = await vscode.workspace.openTextDocument(saveUri);
+          await vscode.window.showTextDocument(doc);
+        }
+      }
+    })
+  );
+
+  // 13b. Import Bookmarks & Restore Backup
+  context.subscriptions.push(
+    vscode.commands.registerCommand('dailyBread.importBookmarks', async () => {
+      const defaultFolder =
+        vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0
+          ? vscode.workspace.workspaceFolders[0].uri.fsPath
+          : os.homedir();
+
+      const picked = await vscode.window.showOpenDialog({
+        defaultUri: vscode.Uri.file(defaultFolder),
+        canSelectMany: false,
+        openLabel: 'Import / Restore',
+        filters: {
+          'Daily Bible Backups & Exports': ['json', 'md']
+        }
+      });
+
+      if (!picked || picked.length === 0) return;
+
+      const fileUri = picked[0];
+      const rawBytes = await vscode.workspace.fs.readFile(fileUri);
+      const rawText = Buffer.from(rawBytes).toString('utf8');
+      const ext = path.extname(fileUri.fsPath).toLowerCase();
+
+      if (ext === '.md') {
+        const count = await bookmarksManager.importBookmarksMarkdown(rawText, name =>
+          bibleManager.findBook(name)
+        );
+        if (currentVerse) updateVerseDisplay(currentVerse);
+        vscode.window.showInformationMessage(
+          count > 0
+            ? `✅ Imported ${count} bookmark(s) from Markdown.`
+            : 'No new bookmarks found in Markdown file (duplicates skipped).'
+        );
+        return;
+      }
+
+      const result = await bookmarksManager.importBackup(rawText);
+
+      // Restore settings if present in Full Backup
+      let settingsRestored = false;
+      if (result.settings && Object.keys(result.settings).length > 0) {
+        const applySettings = await vscode.window.showQuickPick(
+          [
+            {
+              label: '$(check) Restore Settings & Preferences Too',
+              description: 'Apply saved translation, font size, rotation schedule, and display mode',
+              restore: true
+            },
+            {
+              label: '$(bookmark) Import Bookmarks Only',
+              description: 'Keep my current settings untouched',
+              restore: false
+            }
+          ],
+          { placeHolder: `Backup contains ${result.bookmarksImported} new bookmark(s) and extension settings` }
+        );
+
+        if (applySettings?.restore) {
+          const config = vscode.workspace.getConfiguration('dailyBread');
+          const keysToRestore: Array<keyof ExtensionSettings> = [
+            'translation',
+            'dualTranslation',
+            'displayMode',
+            'icon',
+            'rotationSchedule',
+            'rotateOnFileSave',
+            'preventRotationWhileReading',
+            'topic',
+            'fontSize',
+            'fontFamily'
+          ];
+          for (const key of keysToRestore) {
+            if (result.settings[key] !== undefined) {
+              await config.update(key, result.settings[key], vscode.ConfigurationTarget.Global);
+            }
+          }
+          settingsRestored = true;
+        }
+      }
+
+      // Check if backup references translations not yet downloaded locally
+      if (result.installedTranslations && result.installedTranslations.length > 0) {
+        const missing = result.installedTranslations.filter(
+          id => bibleManager.getTranslationInfo(id) && !bibleManager.isTranslationInstalled(id)
+        );
+        if (missing.length > 0) {
+          const dlChoice = await vscode.window.showInformationMessage(
+            `This backup used ${missing.length} additional offline translation(s): ${missing.join(', ')}. Download them now?`,
+            'Download Missing Translations',
+            'Skip'
+          );
+          if (dlChoice === 'Download Missing Translations') {
+            await vscode.window.withProgress(
+              {
+                location: vscode.ProgressLocation.Notification,
+                title: 'Restoring offline Bible translations from backup...',
+                cancellable: false
+              },
+              async progress => {
+                for (const id of missing) {
+                  progress.report({ message: id });
+                  try {
+                    await bibleManager.downloadTranslation(id);
+                  } catch {
+                    // Continue remaining packs even if one fails
+                  }
+                }
+              }
+            );
+          }
+        }
+      }
+
+      if (currentVerse) updateVerseDisplay(currentVerse);
+      BibleReaderView.updateCurrent();
+      TranslationSwitcherView.updateCurrent();
+
+      vscode.window.showInformationMessage(
+        `✅ Import complete: ${result.bookmarksImported} new bookmark(s) added${settingsRestored ? ' and preferences restored' : ''}.`
+      );
     })
   );
 
@@ -626,6 +844,7 @@ export function activate(context: vscode.ExtensionContext) {
       const bTitle = v.translation === 'zulu' ? v.zuluBookName : v.bookName;
 
       const items: vscode.QuickPickItem[] = [
+        { label: 'Scripture & Reading', kind: vscode.QuickPickItemKind.Separator },
         {
           label: '$(sync) Next Verse',
           description: 'Ctrl+Alt+B / Cmd+Alt+B',
@@ -637,9 +856,14 @@ export function activate(context: vscode.ExtensionContext) {
           detail: 'Open clean in-editor Bible tab with side-by-side translation option'
         },
         {
-          label: '$(link) View Verse Cross-References',
-          description: `Treasury of Scripture Knowledge`,
-          detail: 'Explore connected passages and related scriptures for this verse'
+          label: '$(search) Search & Jump to Verse',
+          description: 'Type any reference (e.g. Joh 3:16, Hubo 23:1)',
+          detail: 'Instantly jump to any chapter and verse in the Bible'
+        },
+        {
+          label: '$(globe) Switch / Download Translations',
+          description: `Current: ${getSettings().translation.toUpperCase()}`,
+          detail: 'Search, switch, or download 60+ offline Bible translations & languages'
         },
         {
           label: isBookmarked ? '$(star-full) Remove Bookmark' : '$(star-empty) Bookmark Current Verse',
@@ -647,10 +871,34 @@ export function activate(context: vscode.ExtensionContext) {
           detail: isBookmarked ? 'Remove from saved favorites' : 'Save verse with optional notes and tags'
         },
         {
+          label: '$(link) View Verse Cross-References',
+          description: `Treasury of Scripture Knowledge`,
+          detail: 'Explore connected passages and related scriptures for this verse'
+        },
+
+        { label: 'Browse & Share', kind: vscode.QuickPickItemKind.Separator },
+        {
           label: '$(bookmark) View All Bookmarks',
           description: `${bookmarksManager.getBookmarks().length} saved verses`,
           detail: 'Browse, filter, and jump to your saved favorites'
         },
+        {
+          label: '$(tag) Select Topic / Mood',
+          description: `Current: ${getSettings().topic}`,
+          detail: 'Filter status bar by Peace, Focus, Strength, Joy, Gratitude, or Comfort'
+        },
+        {
+          label: '$(dice) Random Chapter',
+          description: 'Explore scripture unpredictably',
+          detail: 'Pick a random chapter from Genesis to Revelation'
+        },
+        {
+          label: '$(clippy) Copy Verse to Clipboard',
+          description: `${bTitle} ${v.chapter}:${v.verse}`,
+          detail: 'Copy reference and scripture text formatted for sharing'
+        },
+
+        { label: 'Reading Mode & Display', kind: vscode.QuickPickItemKind.Separator },
         {
           label: isRotationPaused ? '$(play) Resume Auto-Rotation' : '$(debug-pause) Pause Auto-Rotation (Reading Mode)',
           description: isRotationPaused ? 'Auto-rotation currently paused' : `Schedule: ${getSettings().rotationSchedule}`,
@@ -664,11 +912,6 @@ export function activate(context: vscode.ExtensionContext) {
           detail: 'Adjust how often verses change (5min, 15min, 30min, 60min, onEditorOpen, or Manual)'
         },
         {
-          label: '$(tag) Select Topic / Mood',
-          description: `Current: ${getSettings().topic}`,
-          detail: 'Filter status bar by Peace, Focus, Strength, Joy, Gratitude, or Comfort'
-        },
-        {
           label: '$(text-size) Change Font Size',
           description: getSettings().fontSize === 0 ? `Auto / Match Editor (${vscode.workspace.getConfiguration('editor').get<number>('fontSize', 14)}px)` : `${getSettings().fontSize}px`,
           detail: 'Adjust scripture text size or sync automatically with VS Code editor font'
@@ -678,25 +921,17 @@ export function activate(context: vscode.ExtensionContext) {
           description: `Current: ${getSettings().fontFamily}`,
           detail: 'Switch between Editor font, Book Serif, Clean Sans-Serif, or Monospace'
         },
+
+        { label: 'Backup & Settings', kind: vscode.QuickPickItemKind.Separator },
         {
-          label: '$(globe) Switch / Download Translations',
-          description: `Current: ${getSettings().translation.toUpperCase()}`,
-          detail: 'Search, switch, or download additional offline Bible translations & languages'
+          label: '$(export) Export Bookmarks & Backup',
+          description: 'JSON, Markdown, TXT, CSV, or HTML',
+          detail: 'Save your bookmarks, notes, tags, and settings to a file'
         },
         {
-          label: '$(search) Search & Jump to Verse',
-          description: 'Type any reference (e.g. Joh 3:16, Hubo 23:1)',
-          detail: 'Instantly jump to any chapter and verse in the Bible'
-        },
-        {
-          label: '$(dice) Random Chapter',
-          description: 'Explore scripture unpredictably',
-          detail: 'Pick a random chapter from Genesis to Revelation'
-        },
-        {
-          label: '$(clippy) Copy Verse to Clipboard',
-          description: `${bTitle} ${v.chapter}:${v.verse}`,
-          detail: 'Copy reference and scripture text formatted for sharing'
+          label: '$(cloud-upload) Import Bookmarks & Restore Backup',
+          description: 'Restore from .json backup or .md export',
+          detail: 'Load saved bookmarks, notes, tags, and preferences from a file'
         },
         {
           label: '$(gear) Configure Extension Settings',
@@ -741,6 +976,10 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.executeCommand('dailyBread.randomChapter');
       } else if (selected.label.includes('Copy Verse')) {
         vscode.commands.executeCommand('dailyBread.copyVerse');
+      } else if (selected.label.includes('Export Bookmarks')) {
+        vscode.commands.executeCommand('dailyBread.exportBookmarks');
+      } else if (selected.label.includes('Import Bookmarks')) {
+        vscode.commands.executeCommand('dailyBread.importBookmarks');
       } else if (selected.label.includes('Configure Extension Settings')) {
         vscode.commands.executeCommand('workbench.action.openSettings', 'dailyBread');
       }
@@ -866,6 +1105,7 @@ export function activate(context: vscode.ExtensionContext) {
       if (currentVerse) {
         updateVerseDisplay(currentVerse);
       }
+      toolsProvider.refresh();
     })
   );
 

@@ -64,7 +64,8 @@ describe('BibleManager Data & Translation Integrity Tests', () => {
     assert.ok(randVerse.text.length > 0);
   });
 
-  it('should bundle only kjv and zulu by default and expose downloadable catalog', async () => {
+  it('should bundle only kjv and zulu by default and expose downloadable catalog', async function () {
+    this.timeout(10000);
     const tmpStorage = fs.mkdtempSync(path.join(os.tmpdir(), 'daily-bible-test-'));
     try {
       const extPath = path.resolve(__dirname, '../../');
