@@ -15,11 +15,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build Snap with Snapcraft (core24 + gnome extension)
-        id: snapcraft
-        uses: snapcore/action-build@v1
-        with:
-          path: desktop
+      - name: Install Snapcraft
+        run: |
+          for attempt in 1 2 3; do
+            if sudo snap install snapcraft --classic; then
+              exit 0
+            fi
+            echo "snap install snapcraft failed (attempt $attempt), retrying in 5s..."
+            sleep 5
+          done
+          exit 1
+
+      - name: Build Snap with Snapcraft (destructive-mode on ubuntu-24.04)
+        working-directory: desktop
+        run: sudo snapcraft pack --destructive-mode
 
       - name: Upload Snap artifact
         uses: actions/upload-artifact@v4
