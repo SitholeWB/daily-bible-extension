@@ -86,7 +86,6 @@ export class StatusBarController {
     const bookmarkVerseLabel = isBookmarked
       ? '⭐ Bookmarked *(Click to Remove)*'
       : '🔖 **Bookmark This Verse**';
-    const bookmarkInlineLabel = isBookmarked ? '⭐ Bookmarked' : '🔖 Bookmark';
     const bookmarkCmd = isBookmarked ? 'command:dailyBread.removeCurrentBookmark' : 'command:dailyBread.bookmarkCurrent';
     const bookmarkTooltip = isBookmarked
       ? `Remove ${bookTitle} ${verse.chapter}:${verse.verse} from saved bookmarks`
@@ -127,13 +126,9 @@ export class StatusBarController {
     md.appendMarkdown(`---\n\n`);
 
     // --- 2. ACTIVE VERSE SECTION ---
+    md.appendMarkdown(`## 📖 **${bookTitle} ${verse.chapter}:${verse.verse}**\n\n`);
     md.appendMarkdown(
-      `## 📖 **${bookTitle} ${verse.chapter}:${verse.verse}** &nbsp;&nbsp;|&nbsp;&nbsp; ` +
-      `[${bookmarkVerseLabel}](${bookmarkCmd} "${bookmarkTooltip}") &nbsp;&bull;&nbsp; ` +
-      `[📝 **Add Study Note**](command:dailyBread.addNote "Write a personal study note for ${bookTitle} ${verse.chapter}:${verse.verse}")\n\n`
-    );
-    md.appendMarkdown(
-      `> ### **"${verse.text}"** &nbsp; [${bookmarkInlineLabel}](${bookmarkCmd} "${bookmarkTooltip}")\n>\n` +
+      `> ### **"${verse.text}"**\n>\n` +
       `> [${bookmarkVerseLabel}](${bookmarkCmd} "${bookmarkTooltip}") &nbsp;&bull;&nbsp; ` +
       `[📝 Add Study Note](command:dailyBread.addNote "Write a study note for this verse") &nbsp;&bull;&nbsp; ` +
       `[$(copy) Copy Verse](command:dailyBread.copyVerse "Copy verse to clipboard") &nbsp;&bull;&nbsp; ` +
@@ -163,10 +158,7 @@ export class StatusBarController {
         const vNum = i + 1;
         const vText = verse.chapterVerses[i];
         if (vNum === verse.verse) {
-          md.appendMarkdown(
-            `👉 **<mark>&nbsp;[${vNum}] ${vText}&nbsp;</mark>** *(Active Verse)* &nbsp;&mdash;&nbsp; ` +
-            `[${bookmarkInlineLabel}](${bookmarkCmd} "${bookmarkTooltip}")  \n\n`
-          );
+          md.appendMarkdown(`👉 **<mark>&nbsp;[${vNum}] ${vText}&nbsp;</mark>** *(Active Verse)*  \n\n`);
         } else {
           md.appendMarkdown(`**${vNum}.** ${vText}  \n\n`);
         }
@@ -222,8 +214,6 @@ export class StatusBarController {
       `### 🧭 Quick Navigation\n\n` +
       `[$(sync) Next Verse](command:dailyBread.nextVerse "Advance to next verse") &nbsp;&bull;&nbsp; ` +
       `[$(book) Read In Editor](command:dailyBread.readChapter "Open full in-editor reader tab") &nbsp;&bull;&nbsp; ` +
-      `[${bookmarkLabel}](${bookmarkCmd} "${bookmarkTooltip}") &nbsp;&bull;&nbsp; ` +
-      `[📝 Add Note](command:dailyBread.addNote "Write a study note for this verse") &nbsp;&bull;&nbsp; ` +
       `[$(globe) Switch Translation](command:dailyBread.switchTranslation "Search, switch, or download Bible translations") &nbsp;&bull;&nbsp; ` +
       `[$(search) Search / Jump](command:dailyBread.jumpTo "Search any scripture") &nbsp;&bull;&nbsp; ` +
       `[🔗 Cross Refs](command:dailyBread.showCrossReferences "View full cross-reference list") &nbsp;&bull;&nbsp; ` +
