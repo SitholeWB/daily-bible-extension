@@ -392,15 +392,15 @@ export class BibleReaderView {
               <div class="verse-actions">
                 ${hasCrossRefs ? `<button title="Cross References" class="action-btn" onclick="toggleCrossRefs(${vNum})">🔗</button>` : ''}
                 <button title="Add Study Note" class="action-btn" onclick="addVerseNote(${book.id}, ${this.currentChapter}, ${vNum}, '${this.primaryTranslation}')">📝</button>
-                <button title="Bookmark" onclick="bookmarkVerse(${book.id}, ${this.currentChapter}, ${vNum}, '${this.primaryTranslation}')">${isBookmarked ? '⭐' : '☆'}</button>
-                <button title="Copy" onclick="copyVerse(${book.id}, ${this.currentChapter}, ${vNum}, '${this.primaryTranslation}')">📋</button>
+                <button title="${isBookmarked ? 'Remove Bookmark' : 'Bookmark Verse'}" class="action-btn bookmark-btn ${isBookmarked ? 'bookmarked' : ''}" onclick="bookmarkVerse(${book.id}, ${this.currentChapter}, ${vNum}, '${this.primaryTranslation}')">${isBookmarked ? '⭐' : '☆'}</button>
+                <button title="Copy" class="action-btn" onclick="copyVerse(${book.id}, ${this.currentChapter}, ${vNum}, '${this.primaryTranslation}')">📋</button>
               </div>
             </div>
             <div class="verse-col parallel-col">
               <span class="verse-num">${vNum}</span>
               <span class="verse-text">${vTextParallel}</span>
               <div class="verse-actions">
-                <button title="Copy" onclick="copyVerse(${book.id}, ${this.currentChapter}, ${vNum}, '${this.parallelTranslation}')">📋</button>
+                <button title="Copy" class="action-btn" onclick="copyVerse(${book.id}, ${this.currentChapter}, ${vNum}, '${this.parallelTranslation}')">📋</button>
               </div>
             </div>
           </div>
@@ -414,7 +414,7 @@ export class BibleReaderView {
             <span class="verse-actions">
               ${hasCrossRefs ? `<button class="action-btn" title="View Cross References" onclick="toggleCrossRefs(${vNum})">🔗</button>` : ''}
               <button class="action-btn" title="Add Study Note" onclick="addVerseNote(${book.id}, ${this.currentChapter}, ${vNum}, '${this.primaryTranslation}')">📝</button>
-              <button class="action-btn" title="Bookmark" onclick="bookmarkVerse(${book.id}, ${this.currentChapter}, ${vNum}, '${this.primaryTranslation}')">${isBookmarked ? '⭐' : '☆'}</button>
+              <button class="action-btn bookmark-btn ${isBookmarked ? 'bookmarked' : ''}" title="${isBookmarked ? 'Remove Bookmark' : 'Bookmark Verse'}" onclick="bookmarkVerse(${book.id}, ${this.currentChapter}, ${vNum}, '${this.primaryTranslation}')">${isBookmarked ? '⭐' : '☆'}</button>
               <button class="action-btn" title="Copy Verse" onclick="copyVerse(${book.id}, ${this.currentChapter}, ${vNum}, '${this.primaryTranslation}')">📋</button>
             </span>
           </div>
@@ -634,15 +634,29 @@ export class BibleReaderView {
 
     .action-btn {
       background: none;
-      border: none;
+      border: 1px solid transparent;
+      color: var(--fg);
       cursor: pointer;
-      font-size: 13px;
-      padding: 2px 4px;
-      border-radius: 3px;
+      font-size: 14px;
+      padding: 2px 5px;
+      border-radius: 4px;
+      line-height: 1.2;
+      opacity: 0.9;
     }
 
     .action-btn:hover {
       background: var(--hover-bg);
+      border-color: var(--border);
+      opacity: 1;
+    }
+
+    .bookmark-btn {
+      font-size: 15px;
+      color: #facc15;
+    }
+
+    .is-bookmarked .verse-actions {
+      opacity: 1;
     }
 
     /* Parallel view layout */
