@@ -1,0 +1,34 @@
+name: Build & Release Desktop Snap
+
+on:
+  push:
+    tags:
+      - 'desktop-v*'
+  workflow_dispatch:
+
+jobs:
+  build-snap:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Snap with Snapcraft (core24 + gnome extension)
+        id: snapcraft
+        uses: snapcore/action-build@v1
+        with:
+          path: desktop
+
+      - name: Upload Snap artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-bread-bible-snap
+          path: desktop/*.snap
+
+      - name: Attach Snap to GitHub Release (on tag)
+        if: startsWith(github.ref, 'refs/tags/desktop-v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: desktop/*.snap
