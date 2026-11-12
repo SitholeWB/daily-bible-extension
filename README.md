@@ -1,9 +1,9 @@
 # Daily Bible — Offline & Scripture Status Bar 📖
 
 [![CI](https://github.com/SitholeWB/daily-bible-extension/actions/workflows/ci.yml/badge.svg)](https://github.com/SitholeWB/daily-bible-extension/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)](https://marketplace.visualstudio.com)
+[![Version](https://img.shields.io/badge/version-1.4.1-blue.svg)](https://marketplace.visualstudio.com)
 [![Offline](https://img.shields.io/badge/network-100%25%20offline%20core-success.svg)](https://github.com)
-[![Translations](https://img.shields.io/badge/translations-59%20languages%20%26%20versions-purple.svg)](https://github.com)
+[![Translations](https://img.shields.io/badge/translations-60%20languages%20%26%20versions-purple.svg)](https://github.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > **"Nginamandla ukwenza konke ngaye ongiqinisayo." — KwabaseFilipi 4:13**  

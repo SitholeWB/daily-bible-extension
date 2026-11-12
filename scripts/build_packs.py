@@ -36,6 +36,7 @@ GITHUB_RAW_BASE = "https://raw.githubusercontent.com/SitholeWB/daily-bible-exten
 CURATED_EBIBLE = [
     # English alternatives
     ("engbsb", "engbsb", "English", "BSB", "Berean Standard Bible (BSB)", "English"),
+    ("engmsb", "engmsb", "English", "MSB", "Majority Standard Bible (MSB)", "English"),
     ("eng-asv", "eng-asv", "English", "ASV", "American Standard Version (1901)", "English"),
     ("engBBE", "engBBE", "English", "BBE", "Bible in Basic English (BBE)", "English"),
     ("engDBY", "engDBY", "English", "DBY", "Darby Translation (1890)", "English"),

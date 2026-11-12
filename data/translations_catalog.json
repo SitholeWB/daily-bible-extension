@@ -50,6 +50,19 @@
     "downloadUrl": "https://raw.githubusercontent.com/SitholeWB/daily-bible-extension/main/packs/engbsb.json.gz"
   },
   {
+    "id": "engmsb",
+    "languageCode": "eng",
+    "language": "English",
+    "name": "Majority Standard Bible (MSB)",
+    "shortName": "MSB",
+    "direction": "ltr",
+    "copyright": "public domain",
+    "bundled": false,
+    "sizeKB": 1191,
+    "region": "English",
+    "downloadUrl": "https://raw.githubusercontent.com/SitholeWB/daily-bible-extension/main/packs/engmsb.json.gz"
+  },
+  {
     "id": "eng-asv",
     "languageCode": "eng",
     "language": "English",
