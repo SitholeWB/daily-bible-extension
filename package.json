@@ -2,7 +2,7 @@
   "name": "daily-bread-statusbar",
   "displayName": "Daily Bible — Offline & Scripture Status Bar",
   "description": "100% Offline Holy Bible with glanceable status bar scriptures, parallel dual-reader, bookmarks, and curated mood themes.",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "publisher": "sitholewb",
   "icon": "media/icon.png",
   "repository": {
@@ -30,7 +30,12 @@
   ],
   "main": "./dist/extension.js",
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "onView:dailyBreadExplorer",
+    "onView:dailyBreadTools",
+    "onView:dailyBreadBookmarks",
+    "onView:dailyBreadNotes",
+    "onView:dailyBreadTopics"
   ],
   "contributes": {
     "viewsContainers": {

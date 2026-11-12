@@ -29,19 +29,18 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Register Tree Views
   const explorerProvider = new BibleExplorerProvider(bibleManager);
-  vscode.window.registerTreeDataProvider('dailyBreadExplorer', explorerProvider);
-
   const bookmarksProvider = new BookmarksProvider(bookmarksManager);
-  vscode.window.registerTreeDataProvider('dailyBreadBookmarks', bookmarksProvider);
-
   const notesProvider = new NotesProvider(notesManager);
-  vscode.window.registerTreeDataProvider('dailyBreadNotes', notesProvider);
-
   const topicsProvider = new TopicsProvider(bibleManager);
-  vscode.window.registerTreeDataProvider('dailyBreadTopics', topicsProvider);
-
   const toolsProvider = new ToolsProvider(bibleManager, () => isRotationPaused);
-  vscode.window.registerTreeDataProvider('dailyBreadTools', toolsProvider);
+
+  context.subscriptions.push(
+    vscode.window.registerTreeDataProvider('dailyBreadExplorer', explorerProvider),
+    vscode.window.registerTreeDataProvider('dailyBreadTools', toolsProvider),
+    vscode.window.registerTreeDataProvider('dailyBreadBookmarks', bookmarksProvider),
+    vscode.window.registerTreeDataProvider('dailyBreadNotes', notesProvider),
+    vscode.window.registerTreeDataProvider('dailyBreadTopics', topicsProvider)
+  );
 
   // Settings
   const getSettings = (): ExtensionSettings => {
