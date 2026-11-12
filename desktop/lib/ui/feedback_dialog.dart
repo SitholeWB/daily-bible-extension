@@ -17,7 +17,7 @@ class FeedbackDialog extends StatefulWidget {
     super.key,
     required this.storage,
     required this.activeTranslation,
-    this.appVersion = '1.0.4',
+    this.appVersion = '1.0.5',
   });
 
   static String decodeWebhookUrl() {

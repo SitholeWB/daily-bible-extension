@@ -6,4 +6,4 @@ Icon=${SNAP}/meta/gui/daily-bread.png
 Terminal=false
 Type=Application
 Categories=Education;Literature;
-StartupWMClass=daily_bread
+StartupWMClass=com.dailybread.daily_bread
