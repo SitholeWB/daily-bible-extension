@@ -37,3 +37,6 @@ parts:
     source: .
     plugin: flutter
     flutter-target: lib/main.dart
+    override-pull: |
+      craftctl default
+      rm -rf build .dart_tool linux/flutter/ephemeral
