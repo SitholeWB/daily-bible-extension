@@ -340,12 +340,23 @@ class BibleRepository {
     VerseRef(bookId: 40, chapter: 11, verse: 28), // Matt 11:28
     VerseRef(bookId: 43, chapter: 14, verse: 27), // John 14:27
     VerseRef(bookId: 19, chapter: 119, verse: 105), // Psalm 119:105
+    VerseRef(bookId: 19, chapter: 27, verse: 1), // Psalm 27:1
+    VerseRef(bookId: 45, chapter: 12, verse: 12), // Rom 12:12
+    VerseRef(bookId: 48, chapter: 5, verse: 22), // Gal 5:22
+    VerseRef(bookId: 50, chapter: 4, verse: 6), // Phil 4:6
+    VerseRef(bookId: 40, chapter: 6, verse: 33), // Matt 6:33
+    VerseRef(bookId: 23, chapter: 41, verse: 10), // Isa 41:10
+    VerseRef(bookId: 19, chapter: 91, verse: 1), // Psalm 91:1
+    VerseRef(bookId: 47, chapter: 12, verse: 9), // 2 Cor 12:9
+    VerseRef(bookId: 58, chapter: 11, verse: 1), // Heb 11:1
+    VerseRef(bookId: 62, chapter: 4, verse: 19), // 1 John 4:19
+    VerseRef(bookId: 19, chapter: 121, verse: 1), // Psalm 121:1
+    VerseRef(bookId: 20, chapter: 16, verse: 3), // Prov 16:3
   ];
 
-  VerseRef getDailyVerseRef() {
+  VerseRef getDailyVerseRef({int slotOffset = 0}) {
     final now = DateTime.now();
-    final dayOfYear =
-        now.difference(DateTime(now.year, 1, 1)).inDays;
-    return _dailyVerses[dayOfYear % _dailyVerses.length];
+    final dayOfYear = now.difference(DateTime(now.year, 1, 1)).inDays;
+    return _dailyVerses[(dayOfYear * 3 + slotOffset) % _dailyVerses.length];
   }
 }

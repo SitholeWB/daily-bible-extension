@@ -18,6 +18,15 @@ class StorageService {
   String feedbackContact = '';
   int feedbackLastSentMs = 0;
 
+  bool dailyNotificationsEnabled = true;
+  int morningHour = 8;
+  int morningMinute = 0;
+  int noonHour = 12;
+  int noonMinute = 0;
+  int afternoonHour = 17;
+  int afternoonMinute = 0;
+  String lastNotifiedSlotKey = '';
+
   File? _dataFile;
 
   Future<void> init() async {
@@ -35,6 +44,15 @@ class StorageService {
         feedbackAuthor = (json['feedbackAuthor'] ?? '') as String;
         feedbackContact = (json['feedbackContact'] ?? '') as String;
         feedbackLastSentMs = (json['feedbackLastSentMs'] ?? 0) as int;
+        dailyNotificationsEnabled =
+            (json['dailyNotificationsEnabled'] ?? true) as bool;
+        morningHour = (json['morningHour'] ?? 8) as int;
+        morningMinute = (json['morningMinute'] ?? 0) as int;
+        noonHour = (json['noonHour'] ?? 12) as int;
+        noonMinute = (json['noonMinute'] ?? 0) as int;
+        afternoonHour = (json['afternoonHour'] ?? 17) as int;
+        afternoonMinute = (json['afternoonMinute'] ?? 0) as int;
+        lastNotifiedSlotKey = (json['lastNotifiedSlotKey'] ?? '') as String;
 
         final themeStr = (json['themeMode'] ?? 'system') as String;
         themeMode = switch (themeStr) {
@@ -73,6 +91,14 @@ class StorageService {
       'feedbackAuthor': feedbackAuthor,
       'feedbackContact': feedbackContact,
       'feedbackLastSentMs': feedbackLastSentMs,
+      'dailyNotificationsEnabled': dailyNotificationsEnabled,
+      'morningHour': morningHour,
+      'morningMinute': morningMinute,
+      'noonHour': noonHour,
+      'noonMinute': noonMinute,
+      'afternoonHour': afternoonHour,
+      'afternoonMinute': afternoonMinute,
+      'lastNotifiedSlotKey': lastNotifiedSlotKey,
       'bookmarks': bookmarks.map((b) => b.toJson()).toList(),
       'notes': notes.map((n) => n.toJson()).toList(),
     };

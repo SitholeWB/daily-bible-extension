@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/bible_models.dart';
 import '../services/bible_repository.dart';
+import '../services/notification_service.dart';
 import '../services/storage_service.dart';
 import 'cross_ref_panel.dart';
 import 'feedback_dialog.dart';
+import 'notification_settings_dialog.dart';
 import 'study_note_dialog.dart';
 import 'translations_panel.dart';
 
@@ -13,12 +15,14 @@ enum SidebarTab { books, search, bookmarks, notes, topics, translations }
 class AppShell extends StatefulWidget {
   final BibleRepository repo;
   final StorageService storage;
+  final NotificationService notifications;
   final VoidCallback onThemeChanged;
 
   const AppShell({
     super.key,
     required this.repo,
     required this.storage,
+    required this.notifications,
     required this.onThemeChanged,
   });
 
@@ -196,6 +200,17 @@ class _AppShellState extends State<AppShell> {
         activeTranslation: widget.storage.translationId,
       ),
     );
+  }
+
+  Future<void> _openNotificationSettings() async {
+    await showDialog<void>(
+      context: context,
+      builder: (_) => NotificationSettingsDialog(
+        storage: widget.storage,
+        notifications: widget.notifications,
+      ),
+    );
+    if (mounted) setState(() {});
   }
 
   @override
@@ -505,6 +520,18 @@ class _AppShellState extends State<AppShell> {
             tooltip: 'Export Notes & Bookmarks Backup',
             icon: const Icon(Icons.save_alt, size: 19),
             onPressed: _exportBackup,
+          ),
+
+          // Notifications
+          IconButton(
+            tooltip: 'Daily Bible Notifications (3× daily)',
+            icon: Icon(
+              widget.storage.dailyNotificationsEnabled
+                  ? Icons.notifications_active_outlined
+                  : Icons.notifications_off_outlined,
+              size: 19,
+            ),
+            onPressed: _openNotificationSettings,
           ),
 
           // Feedback
