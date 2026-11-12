@@ -1,7 +1,7 @@
 name: daily-bread-bible
 title: Daily Bread — Offline Bible & Study
 base: core24
-version: '1.0.2'
+version: '1.0.3'
 license: MIT
 icon: snap/gui/daily-bread.png
 summary: Offline Bible & Study Notes — 60 translations, cross-refs & parallel view
