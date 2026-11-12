@@ -1,20 +1,23 @@
 name: daily-bread-bible
 title: Daily Bread — Offline Bible & Study
 base: core24
-version: '1.0.1'
+version: '1.0.2'
 license: MIT
 icon: snap/gui/daily-bread.png
-summary: Offline Bible & Study Notes with isiZulu, KJV, 60 packs & cross-references
+summary: Offline Bible & Study Notes — 60 translations, cross-refs & parallel view
 description: |
   Daily Bread is a fast, modern, offline-first Bible reading and study app
   built natively for Ubuntu and Linux.
 
   Features:
-  - Bundled offline KJV and isiZulu (1959) with bilingual book names
-  - 58 additional downloadable offline Bible packs across global & African languages
+  - Offline-first reading with 60 downloadable Bible translations across global
+    and African languages (including KJV, WEB, BSB, MSB, Spanish, French,
+    Portuguese, German, Swahili, isiZulu, and more)
   - Parallel side-by-side translation comparison
-  - 63,000+ Treasury of Scripture Knowledge (TSK) cross-references
+  - 63,000+ Treasury of Scripture Knowledge (TSK) cross-references with
+    inline verse previews
   - Markdown study notes, verse bookmarks, curated topics, and JSON backups
+  - Fast full-text search and direct verse reference lookup (e.g. John 3:16)
   - Native Ubuntu Yaru Light & Dark theme support
 
 grade: stable
