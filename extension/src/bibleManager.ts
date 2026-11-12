@@ -23,9 +23,11 @@ export class BibleManager {
     const candidates = [
       path.join(extensionPath, 'data'),
       path.join(extensionPath, '..', 'data'),
+      path.join(extensionPath, '..', '..', 'data'),
       path.resolve(__dirname, '..', 'data'),
       path.resolve(__dirname, 'data'),
-      path.resolve(process.cwd(), 'data')
+      path.resolve(process.cwd(), 'data'),
+      path.resolve(process.cwd(), '..', 'data')
     ];
 
     let foundDir = candidates[0];
