@@ -103,11 +103,27 @@ export interface ExtensionSettings {
   fontFamily: string; // 'editor' | 'serif' | 'sans-serif' | 'monospace' | 'system'
 }
 
+export interface StudyNote {
+  id: string;
+  bookId?: number;
+  bookName?: string;
+  chapter?: number;
+  verse?: number;
+  translation?: Translation;
+  verseText?: string;
+  title: string;
+  content: string;
+  tags?: string[];
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface DailyBibleBackup {
   format: 'daily-bible-backup';
   version: number;
   exportedAt: string;
   bookmarks: Bookmark[];
+  notes?: StudyNote[];
   settings?: Partial<ExtensionSettings>;
   installedTranslations?: string[];
 }

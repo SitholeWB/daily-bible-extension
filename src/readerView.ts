@@ -130,6 +130,18 @@ export class BibleReaderView {
           case 'openBookPicker':
             this.showBookPicker();
             break;
+          case 'addNoteForVerse': {
+            const vData = this.bibleManager.getVerse(
+              message.bookId,
+              message.chapter,
+              message.verse,
+              message.translation
+            );
+            if (vData) {
+              vscode.commands.executeCommand('dailyBread.addNote', vData);
+            }
+            break;
+          }
           case 'jumpToReference': {
             if (message.ref) {
               const parsed = this.bibleManager.parseReference(message.ref);
@@ -379,6 +391,7 @@ export class BibleReaderView {
               <span class="verse-text">${vTextPrimary}</span>
               <div class="verse-actions">
                 ${hasCrossRefs ? `<button title="Cross References" class="action-btn" onclick="toggleCrossRefs(${vNum})">🔗</button>` : ''}
+                <button title="Add Study Note" class="action-btn" onclick="addVerseNote(${book.id}, ${this.currentChapter}, ${vNum}, '${this.primaryTranslation}')">📝</button>
                 <button title="Bookmark" onclick="bookmarkVerse(${book.id}, ${this.currentChapter}, ${vNum}, '${this.primaryTranslation}')">${isBookmarked ? '⭐' : '☆'}</button>
                 <button title="Copy" onclick="copyVerse(${book.id}, ${this.currentChapter}, ${vNum}, '${this.primaryTranslation}')">📋</button>
               </div>
@@ -400,6 +413,7 @@ export class BibleReaderView {
             <span class="verse-text">${vTextPrimary}</span>
             <span class="verse-actions">
               ${hasCrossRefs ? `<button class="action-btn" title="View Cross References" onclick="toggleCrossRefs(${vNum})">🔗</button>` : ''}
+              <button class="action-btn" title="Add Study Note" onclick="addVerseNote(${book.id}, ${this.currentChapter}, ${vNum}, '${this.primaryTranslation}')">📝</button>
               <button class="action-btn" title="Bookmark" onclick="bookmarkVerse(${book.id}, ${this.currentChapter}, ${vNum}, '${this.primaryTranslation}')">${isBookmarked ? '⭐' : '☆'}</button>
               <button class="action-btn" title="Copy Verse" onclick="copyVerse(${book.id}, ${this.currentChapter}, ${vNum}, '${this.primaryTranslation}')">📋</button>
             </span>
@@ -916,6 +930,10 @@ export class BibleReaderView {
 
     function bookmarkVerse(bookId, chapter, verse, translation) {
       vscode.postMessage({ command: 'bookmarkVerse', bookId, chapter, verse, translation });
+    }
+
+    function addVerseNote(bookId, chapter, verse, translation) {
+      vscode.postMessage({ command: 'addNoteForVerse', bookId, chapter, verse, translation });
     }
 
     function toggleCrossRefs(vNum) {

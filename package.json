@@ -2,7 +2,7 @@
   "name": "daily-bread-statusbar",
   "displayName": "Daily Bible — Offline & Scripture Status Bar",
   "description": "100% Offline Holy Bible with glanceable status bar scriptures, parallel dual-reader, bookmarks, and curated mood themes.",
-  "version": "1.4.2",
+  "version": "1.5.0",
   "publisher": "sitholewb",
   "icon": "media/icon.png",
   "repository": {
@@ -50,18 +50,23 @@
           "visibility": "visible"
         },
         {
+          "id": "dailyBreadTools",
+          "name": "Quick Actions, Translations & Backup",
+          "visibility": "visible"
+        },
+        {
           "id": "dailyBreadBookmarks",
           "name": "My Bookmarks & Favorites",
           "visibility": "visible"
         },
         {
-          "id": "dailyBreadTopics",
-          "name": "Curated Topics & Moods",
+          "id": "dailyBreadNotes",
+          "name": "My Study Notes",
           "visibility": "visible"
         },
         {
-          "id": "dailyBreadTools",
-          "name": "Quick Actions, Translations & Backup",
+          "id": "dailyBreadTopics",
+          "name": "Curated Topics & Moods",
           "visibility": "visible"
         }
       ]
@@ -171,6 +176,21 @@
         "command": "dailyBread.setRotationSchedule",
         "title": "Daily Bible: Change Rotation Schedule Frequency",
         "icon": "$(clock)"
+      },
+      {
+        "command": "dailyBread.addNote",
+        "title": "Daily Bible: Add / Edit Study Note for Current Verse",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "dailyBread.newNote",
+        "title": "Daily Bible: New Study Note",
+        "icon": "$(add)"
+      },
+      {
+        "command": "dailyBread.deleteNoteItem",
+        "title": "Delete Study Note",
+        "icon": "$(trash)"
       }
     ],
     "keybindings": [
@@ -196,12 +216,22 @@
           "command": "dailyBread.jumpTo",
           "when": "view == dailyBreadExplorer",
           "group": "navigation"
+        },
+        {
+          "command": "dailyBread.newNote",
+          "when": "view == dailyBreadNotes",
+          "group": "navigation"
         }
       ],
       "view/item/context": [
         {
           "command": "dailyBread.deleteBookmarkItem",
           "when": "view == dailyBreadBookmarks && viewItem == bookmarkItem",
+          "group": "inline"
+        },
+        {
+          "command": "dailyBread.deleteNoteItem",
+          "when": "view == dailyBreadNotes && viewItem == studyNoteItem",
           "group": "inline"
         }
       ]

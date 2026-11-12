@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { Bookmark, DailyBibleBackup, ExtensionSettings, VerseData } from './types';
+import { Bookmark, DailyBibleBackup, ExtensionSettings, StudyNote, VerseData } from './types';
 
 export class BookmarksManager {
   private static readonly STORAGE_KEY = 'dailyBread.bookmarks';
@@ -207,12 +207,17 @@ export class BookmarksManager {
     return JSON.stringify(this.getBookmarks(), null, 2);
   }
 
-  public exportFullBackup(settings: Partial<ExtensionSettings>, installedTranslations: string[]): string {
+  public exportFullBackup(
+    settings: Partial<ExtensionSettings>,
+    installedTranslations: string[],
+    notes?: StudyNote[]
+  ): string {
     const backup: DailyBibleBackup = {
       format: 'daily-bible-backup',
       version: 1,
       exportedAt: new Date().toISOString(),
       bookmarks: this.getBookmarks(),
+      notes: notes && notes.length > 0 ? notes : undefined,
       settings,
       installedTranslations
     };
@@ -255,7 +260,12 @@ export class BookmarksManager {
 
   public async importBackup(
     jsonStr: string
-  ): Promise<{ bookmarksImported: number; settings?: Partial<ExtensionSettings>; installedTranslations?: string[] }> {
+  ): Promise<{
+    bookmarksImported: number;
+    notes?: StudyNote[];
+    settings?: Partial<ExtensionSettings>;
+    installedTranslations?: string[];
+  }> {
     try {
       const parsed = JSON.parse(jsonStr);
       if (Array.isArray(parsed)) {
@@ -268,6 +278,7 @@ export class BookmarksManager {
         const count = await this.mergeBookmarkItems(backup.bookmarks);
         return {
           bookmarksImported: count,
+          notes: Array.isArray(backup.notes) ? backup.notes : undefined,
           settings: backup.settings,
           installedTranslations: Array.isArray(backup.installedTranslations) ? backup.installedTranslations : undefined
         };

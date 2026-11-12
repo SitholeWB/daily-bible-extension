@@ -64,6 +64,13 @@ export class ToolsProvider implements vscode.TreeDataProvider<ToolTreeItem> {
         'Search, switch, or download 60+ offline Bible translations'
       ),
       new ToolTreeItem(
+        'Add Study Note',
+        'Write & Save',
+        'edit',
+        'dailyBread.addNote',
+        'Write a personal Bible study note linked to the current verse'
+      ),
+      new ToolTreeItem(
         'View Verse Cross-References',
         'TSK',
         'link',

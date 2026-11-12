@@ -3,23 +3,28 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { BibleManager } from './bibleManager';
 import { BookmarksManager } from './bookmarks';
+import { NotesManager } from './notesManager';
 import { BibleReaderView } from './readerView';
+import { StudyNoteView } from './studyNoteView';
 import { TranslationSwitcherView } from './translationSwitcherView';
 import { StatusBarController } from './statusBar';
 import { BibleExplorerProvider } from './sidebar/bibleExplorerProvider';
 import { BookmarksProvider, BookmarkTreeItem } from './sidebar/bookmarksProvider';
+import { NotesProvider, NoteTreeItem } from './sidebar/notesProvider';
 import { TopicsProvider } from './sidebar/topicsProvider';
 import { ToolsProvider } from './sidebar/toolsProvider';
-import { Bookmark, ExtensionSettings, RotationSchedule, StatusDisplayMode, StatusIconType, Translation, VerseData } from './types';
+import { Bookmark, ExtensionSettings, RotationSchedule, StatusDisplayMode, StatusIconType, StudyNote, Translation, VerseData } from './types';
 
 let bibleManager: BibleManager;
 let bookmarksManager: BookmarksManager;
+let notesManager: NotesManager;
 let statusBarController: StatusBarController;
 let rotationTimer: NodeJS.Timeout | undefined;
 
 export function activate(context: vscode.ExtensionContext) {
   bibleManager = new BibleManager(context.extensionPath, context.globalStorageUri.fsPath);
   bookmarksManager = new BookmarksManager(context);
+  notesManager = new NotesManager(context);
   statusBarController = new StatusBarController();
 
   // Register Tree Views
@@ -28,6 +33,9 @@ export function activate(context: vscode.ExtensionContext) {
 
   const bookmarksProvider = new BookmarksProvider(bookmarksManager);
   vscode.window.registerTreeDataProvider('dailyBreadBookmarks', bookmarksProvider);
+
+  const notesProvider = new NotesProvider(notesManager);
+  vscode.window.registerTreeDataProvider('dailyBreadNotes', notesProvider);
 
   const topicsProvider = new TopicsProvider(bibleManager);
   vscode.window.registerTreeDataProvider('dailyBreadTopics', topicsProvider);
@@ -649,7 +657,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       if (choice.format === 'backup') {
         const installedIds = bibleManager.getInstalledTranslations().map(t => t.id);
-        content = bookmarksManager.exportFullBackup(getSettings(), installedIds);
+        content = bookmarksManager.exportFullBackup(getSettings(), installedIds, notesManager.getNotes());
         defaultName = `daily-bible-backup-${dateTag}.json`;
         filters = { 'Daily Bible Backup (JSON)': ['json'] };
       } else if (choice.format === 'md') {
@@ -816,12 +824,18 @@ export function activate(context: vscode.ExtensionContext) {
         }
       }
 
+      let notesImported = 0;
+      if (result.notes && result.notes.length > 0) {
+        notesImported = await notesManager.importNotes(result.notes);
+      }
+
       if (currentVerse) updateVerseDisplay(currentVerse);
       BibleReaderView.updateCurrent();
       TranslationSwitcherView.updateCurrent();
 
+      const noteMsg = notesImported > 0 ? `, ${notesImported} study note(s)` : '';
       vscode.window.showInformationMessage(
-        `✅ Import complete: ${result.bookmarksImported} new bookmark(s) added${settingsRestored ? ' and preferences restored' : ''}.`
+        `✅ Import complete: ${result.bookmarksImported} new bookmark(s)${noteMsg} added${settingsRestored ? ' and preferences restored' : ''}.`
       );
     })
   );
@@ -832,6 +846,38 @@ export function activate(context: vscode.ExtensionContext) {
       if (item && item.bookmark) {
         await bookmarksManager.removeBookmark(item.bookmark.id);
         vscode.window.showInformationMessage(`Bookmark removed.`);
+      }
+    })
+  );
+
+  // 14b. Study Notes Commands
+  context.subscriptions.push(
+    vscode.commands.registerCommand('dailyBread.addNote', (verseData?: VerseData) => {
+      const v = verseData || statusBarController.getVerse() || currentVerse;
+      const existing = v ? notesManager.getNotesForVerse(v.bookId, v.chapter, v.verse)[0] : undefined;
+      StudyNoteView.createOrShow(notesManager, { note: existing, verseData: v });
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('dailyBread.newNote', () => {
+      StudyNoteView.createOrShow(notesManager, {});
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('dailyBread.openNote', (note: StudyNote) => {
+      if (note) {
+        StudyNoteView.createOrShow(notesManager, { note });
+      }
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('dailyBread.deleteNoteItem', async (item: NoteTreeItem) => {
+      if (item && item.note) {
+        await notesManager.deleteNote(item.note.id);
+        vscode.window.showInformationMessage('Study note deleted.');
       }
     })
   );
@@ -869,6 +915,11 @@ export function activate(context: vscode.ExtensionContext) {
           label: isBookmarked ? '$(star-full) Remove Bookmark' : '$(star-empty) Bookmark Current Verse',
           description: `${bTitle} ${v.chapter}:${v.verse}`,
           detail: isBookmarked ? 'Remove from saved favorites' : 'Save verse with optional notes and tags'
+        },
+        {
+          label: '$(edit) Add / Edit Study Note',
+          description: `${bTitle} ${v.chapter}:${v.verse} (${notesManager.getNotes().length} saved notes)`,
+          detail: 'Open in-editor note writer for reflections, sermon outlines, or study notes'
         },
         {
           label: '$(link) View Verse Cross-References',
@@ -960,6 +1011,8 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.executeCommand('dailyBread.bookmarkCurrent');
       } else if (selected.label.includes('Remove Bookmark')) {
         vscode.commands.executeCommand('dailyBread.removeCurrentBookmark');
+      } else if (selected.label.includes('Add / Edit Study Note')) {
+        vscode.commands.executeCommand('dailyBread.addNote');
       } else if (selected.label.includes('View All Bookmarks')) {
         vscode.commands.executeCommand('dailyBread.showBookmarks');
       } else if (selected.label.includes('Select Topic')) {
