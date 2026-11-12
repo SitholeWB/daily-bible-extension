@@ -1,7 +1,7 @@
 name: daily-bread-bible
 title: Daily Bread — Offline Bible & Study
 base: core24
-version: '1.0.5'
+version: '1.0.6'
 license: MIT
 icon: snap/gui/daily-bread.png
 summary: Offline Bible & Study Notes — 60 translations, cross-refs & parallel view
@@ -26,7 +26,7 @@ confinement: strict
 apps:
   daily-bread-bible:
     command: daily_bread
-    desktop: gui/daily-bread.desktop
+    desktop: gui/daily-bread-bible.desktop
     extensions: [gnome]
     plugs:
       - network
