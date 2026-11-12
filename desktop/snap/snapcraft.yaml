@@ -1,0 +1,58 @@
+name: daily-bread-bible
+title: Daily Bread — Offline Bible & Study
+base: core26
+version: '1.0.1'
+license: MIT
+icon: snap/gui/daily-bread.png
+summary: Offline Bible & Study Notes with isiZulu, KJV, 60 packs & cross-references
+description: |
+  Daily Bread is a fast, modern, offline-first Bible reading and study app
+  built natively for Ubuntu and Linux.
+
+  Features:
+  - Bundled offline KJV and isiZulu (1959) with bilingual book names
+  - 58 additional downloadable offline Bible packs across global & African languages
+  - Parallel side-by-side translation comparison
+  - 63,000+ Treasury of Scripture Knowledge (TSK) cross-references
+  - Markdown study notes, verse bookmarks, curated topics, and JSON backups
+  - Native Ubuntu Yaru Light & Dark theme support
+
+grade: stable
+confinement: strict
+
+apps:
+  daily-bread-bible:
+    command: daily_bread
+    desktop: gui/daily-bread.desktop
+    environment:
+      LD_LIBRARY_PATH: $SNAP/lib:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/usr/lib:$LD_LIBRARY_PATH
+      LIBGL_DRIVERS_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/dri
+      __EGL_VENDOR_LIBRARY_DIRS: $SNAP/usr/share/glvnd/egl_vendor.d
+      GTK_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gtk-3.0
+      GSETTINGS_SCHEMA_DIR: $SNAP/usr/share/glib-2.0/schemas
+      XDG_DATA_DIRS: $SNAP/usr/share:$XDG_DATA_DIRS
+    plugs:
+      - desktop
+      - desktop-legacy
+      - wayland
+      - x11
+      - opengl
+      - gsettings
+      - network
+      - home
+
+parts:
+  daily-bread-bible:
+    plugin: dump
+    source: build/linux/x64/release/bundle
+    stage-packages:
+      - libgtk-3-0t64
+      - libblkid1
+      - liblzma5
+      - libgl1
+      - libegl1
+      - libegl-mesa0
+      - libgl1-mesa-dri
+      - libgles2
+      - libglu1-mesa
+      - fonts-dejavu-core

@@ -4,4 +4,12 @@ out/
 *.log
 .DS_Store
 *.vsix
+*.snap
+desktop/build/
+desktop/.dart_tool/
+desktop/linux/flutter/ephemeral/
+desktop/parts/
+desktop/prime/
+desktop/stage/
+
 

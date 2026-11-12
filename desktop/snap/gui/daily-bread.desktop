@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Daily Bread
+Comment=Offline Bible & Study Notes
+Exec=daily-bread-bible
+Icon=${SNAP}/meta/gui/daily-bread.png
+Terminal=false
+Type=Application
+Categories=Education;Literature;
+StartupWMClass=daily_bread

@@ -1,0 +1,1002 @@
+[
+  {
+    "id": 1,
+    "code": "GEN",
+    "name": "Genesis",
+    "zuluName": "USenesisi",
+    "chapters": 50,
+    "testament": "OT",
+    "aliases": [
+      "gen",
+      "genesis",
+      "sen",
+      "senesisi",
+      "usenesisi",
+      "genesise"
+    ]
+  },
+  {
+    "id": 2,
+    "code": "EXO",
+    "name": "Exodus",
+    "zuluName": "UEksodusi",
+    "chapters": 40,
+    "testament": "OT",
+    "aliases": [
+      "exo",
+      "exod",
+      "exodus",
+      "eks",
+      "eksodusi",
+      "ueksodusi"
+    ]
+  },
+  {
+    "id": 3,
+    "code": "LEV",
+    "name": "Leviticus",
+    "zuluName": "ULevitikusi",
+    "chapters": 27,
+    "testament": "OT",
+    "aliases": [
+      "lev",
+      "leviticus",
+      "ulevitikusi",
+      "levitikusi"
+    ]
+  },
+  {
+    "id": 4,
+    "code": "NUM",
+    "name": "Numbers",
+    "zuluName": "UNumeri",
+    "chapters": 36,
+    "testament": "OT",
+    "aliases": [
+      "num",
+      "numbers",
+      "numeri",
+      "unumeri"
+    ]
+  },
+  {
+    "id": 5,
+    "code": "DEU",
+    "name": "Deuteronomy",
+    "zuluName": "UDuteronomi",
+    "chapters": 34,
+    "testament": "OT",
+    "aliases": [
+      "deu",
+      "deut",
+      "deuteronomy",
+      "duteronomi",
+      "uduteronomi"
+    ]
+  },
+  {
+    "id": 6,
+    "code": "JOS",
+    "name": "Joshua",
+    "zuluName": "UJoshuwa",
+    "chapters": 24,
+    "testament": "OT",
+    "aliases": [
+      "jos",
+      "josh",
+      "joshua",
+      "joshuwa",
+      "ujoshuwa"
+    ]
+  },
+  {
+    "id": 7,
+    "code": "JDG",
+    "name": "Judges",
+    "zuluName": "AbAhluleli",
+    "chapters": 21,
+    "testament": "OT",
+    "aliases": [
+      "jdg",
+      "judg",
+      "judges",
+      "abahluleli",
+      "ahluleli",
+      "ahl"
+    ]
+  },
+  {
+    "id": 8,
+    "code": "RUT",
+    "name": "Ruth",
+    "zuluName": "URuthe",
+    "chapters": 4,
+    "testament": "OT",
+    "aliases": [
+      "rut",
+      "ruth",
+      "ruthe",
+      "uruthe"
+    ]
+  },
+  {
+    "id": 9,
+    "code": "1SA",
+    "name": "1 Samuel",
+    "zuluName": "1 Samuweli",
+    "chapters": 31,
+    "testament": "OT",
+    "aliases": [
+      "1sa",
+      "1sam",
+      "1 samuel",
+      "1samuel",
+      "1 samuweli",
+      "1samuweli"
+    ]
+  },
+  {
+    "id": 10,
+    "code": "2SA",
+    "name": "2 Samuel",
+    "zuluName": "2 Samuweli",
+    "chapters": 24,
+    "testament": "OT",
+    "aliases": [
+      "2sa",
+      "2sam",
+      "2 samuel",
+      "2samuel",
+      "2 samuweli",
+      "2samuweli"
+    ]
+  },
+  {
+    "id": 11,
+    "code": "1KI",
+    "name": "1 Kings",
+    "zuluName": "1 AmaKhosi",
+    "chapters": 22,
+    "testament": "OT",
+    "aliases": [
+      "1ki",
+      "1kin",
+      "1 kgs",
+      "1kgs",
+      "1 kings",
+      "1kings",
+      "1 amakhosi",
+      "1amakhosi",
+      "1kho"
+    ]
+  },
+  {
+    "id": 12,
+    "code": "2KI",
+    "name": "2 Kings",
+    "zuluName": "2 AmaKhosi",
+    "chapters": 25,
+    "testament": "OT",
+    "aliases": [
+      "2ki",
+      "2kin",
+      "2 kgs",
+      "2kgs",
+      "2 kings",
+      "2kings",
+      "2 amakhosi",
+      "2amakhosi",
+      "2kho"
+    ]
+  },
+  {
+    "id": 13,
+    "code": "1CH",
+    "name": "1 Chronicles",
+    "zuluName": "1 IziKronike",
+    "chapters": 29,
+    "testament": "OT",
+    "aliases": [
+      "1ch",
+      "1chr",
+      "1 chronicles",
+      "1chronicles",
+      "1 izikronike",
+      "1izikronike",
+      "1kro"
+    ]
+  },
+  {
+    "id": 14,
+    "code": "2CH",
+    "name": "2 Chronicles",
+    "zuluName": "2 IziKronike",
+    "chapters": 36,
+    "testament": "OT",
+    "aliases": [
+      "2ch",
+      "2chr",
+      "2 chronicles",
+      "2chronicles",
+      "2 izikronike",
+      "2izikronike",
+      "2kro"
+    ]
+  },
+  {
+    "id": 15,
+    "code": "EZR",
+    "name": "Ezra",
+    "zuluName": "UEzra",
+    "chapters": 10,
+    "testament": "OT",
+    "aliases": [
+      "ezr",
+      "ezra",
+      "uezra"
+    ]
+  },
+  {
+    "id": 16,
+    "code": "NEH",
+    "name": "Nehemiah",
+    "zuluName": "UNehemiya",
+    "chapters": 13,
+    "testament": "OT",
+    "aliases": [
+      "neh",
+      "nehemiah",
+      "nehemiya",
+      "unehemiya"
+    ]
+  },
+  {
+    "id": 17,
+    "code": "EST",
+    "name": "Esther",
+    "zuluName": "UEsteri",
+    "chapters": 10,
+    "testament": "OT",
+    "aliases": [
+      "est",
+      "esth",
+      "esther",
+      "esteri",
+      "uesteri"
+    ]
+  },
+  {
+    "id": 18,
+    "code": "JOB",
+    "name": "Job",
+    "zuluName": "UJobe",
+    "chapters": 42,
+    "testament": "OT",
+    "aliases": [
+      "job",
+      "jobe",
+      "ujobe"
+    ]
+  },
+  {
+    "id": 19,
+    "code": "PSA",
+    "name": "Psalms",
+    "zuluName": "AmaHubo",
+    "chapters": 150,
+    "testament": "OT",
+    "aliases": [
+      "psa",
+      "ps",
+      "psalm",
+      "psalms",
+      "hubo",
+      "amahubo",
+      "hub"
+    ]
+  },
+  {
+    "id": 20,
+    "code": "PRO",
+    "name": "Proverbs",
+    "zuluName": "IzAga",
+    "chapters": 31,
+    "testament": "OT",
+    "aliases": [
+      "pro",
+      "prov",
+      "proverbs",
+      "izaga",
+      "aga"
+    ]
+  },
+  {
+    "id": 21,
+    "code": "ECC",
+    "name": "Ecclesiastes",
+    "zuluName": "UmShumayeli",
+    "chapters": 12,
+    "testament": "OT",
+    "aliases": [
+      "ecc",
+      "eccl",
+      "ecclesiastes",
+      "umshumayeli",
+      "shumayeli",
+      "shum"
+    ]
+  },
+  {
+    "id": 22,
+    "code": "SNG",
+    "name": "Song of Solomon",
+    "zuluName": "IsiHlabelelo",
+    "chapters": 8,
+    "testament": "OT",
+    "aliases": [
+      "sng",
+      "song",
+      "song of solomon",
+      "canticles",
+      "isihlabelelo",
+      "hlabelelo",
+      "hlab"
+    ]
+  },
+  {
+    "id": 23,
+    "code": "ISA",
+    "name": "Isaiah",
+    "zuluName": "U-Isaya",
+    "chapters": 66,
+    "testament": "OT",
+    "aliases": [
+      "isa",
+      "isaiah",
+      "isaya",
+      "u-isaya",
+      "uisaya"
+    ]
+  },
+  {
+    "id": 24,
+    "code": "JER",
+    "name": "Jeremiah",
+    "zuluName": "UJeremiya",
+    "chapters": 52,
+    "testament": "OT",
+    "aliases": [
+      "jer",
+      "jeremiah",
+      "jeremiya",
+      "ujeremiya"
+    ]
+  },
+  {
+    "id": 25,
+    "code": "LAM",
+    "name": "Lamentations",
+    "zuluName": "IsiLilo",
+    "chapters": 5,
+    "testament": "OT",
+    "aliases": [
+      "lam",
+      "lamentations",
+      "isililo",
+      "lilo"
+    ]
+  },
+  {
+    "id": 26,
+    "code": "EZK",
+    "name": "Ezekiel",
+    "zuluName": "UHezekeli",
+    "chapters": 48,
+    "testament": "OT",
+    "aliases": [
+      "ezk",
+      "ezek",
+      "ezekiel",
+      "hezekeli",
+      "uhezekeli",
+      "hez"
+    ]
+  },
+  {
+    "id": 27,
+    "code": "DAN",
+    "name": "Daniel",
+    "zuluName": "UDaniyeli",
+    "chapters": 12,
+    "testament": "OT",
+    "aliases": [
+      "dan",
+      "daniel",
+      "daniyeli",
+      "udaniyeli"
+    ]
+  },
+  {
+    "id": 28,
+    "code": "HOS",
+    "name": "Hosea",
+    "zuluName": "UHoseya",
+    "chapters": 14,
+    "testament": "OT",
+    "aliases": [
+      "hos",
+      "hosea",
+      "hoseya",
+      "uhoseya"
+    ]
+  },
+  {
+    "id": 29,
+    "code": "JOL",
+    "name": "Joel",
+    "zuluName": "UJoweli",
+    "chapters": 3,
+    "testament": "OT",
+    "aliases": [
+      "jol",
+      "joel",
+      "joweli",
+      "ujoweli"
+    ]
+  },
+  {
+    "id": 30,
+    "code": "AMO",
+    "name": "Amos",
+    "zuluName": "U-Amose",
+    "chapters": 9,
+    "testament": "OT",
+    "aliases": [
+      "amo",
+      "amos",
+      "amose",
+      "u-amose",
+      "uamose"
+    ]
+  },
+  {
+    "id": 31,
+    "code": "OBA",
+    "name": "Obadiah",
+    "zuluName": "U-Obadiya",
+    "chapters": 1,
+    "testament": "OT",
+    "aliases": [
+      "oba",
+      "obad",
+      "obadiah",
+      "obadiya",
+      "u-obadiya",
+      "uobadiya"
+    ]
+  },
+  {
+    "id": 32,
+    "code": "JON",
+    "name": "Jonah",
+    "zuluName": "UJona",
+    "chapters": 4,
+    "testament": "OT",
+    "aliases": [
+      "jon",
+      "jonah",
+      "jona",
+      "ujona"
+    ]
+  },
+  {
+    "id": 33,
+    "code": "MIC",
+    "name": "Micah",
+    "zuluName": "UMika",
+    "chapters": 7,
+    "testament": "OT",
+    "aliases": [
+      "mic",
+      "micah",
+      "mika",
+      "umika"
+    ]
+  },
+  {
+    "id": 34,
+    "code": "NAM",
+    "name": "Nahum",
+    "zuluName": "UNahume",
+    "chapters": 3,
+    "testament": "OT",
+    "aliases": [
+      "nam",
+      "nah",
+      "nahum",
+      "nahume",
+      "unahume"
+    ]
+  },
+  {
+    "id": 35,
+    "code": "HAB",
+    "name": "Habakkuk",
+    "zuluName": "UHabakuki",
+    "chapters": 3,
+    "testament": "OT",
+    "aliases": [
+      "hab",
+      "habakkuk",
+      "habakuki",
+      "uhabakuki"
+    ]
+  },
+  {
+    "id": 36,
+    "code": "ZEP",
+    "name": "Zephaniah",
+    "zuluName": "UZefaniya",
+    "chapters": 3,
+    "testament": "OT",
+    "aliases": [
+      "zep",
+      "zeph",
+      "zephaniah",
+      "zefaniya",
+      "uzefaniya"
+    ]
+  },
+  {
+    "id": 37,
+    "code": "HAG",
+    "name": "Haggai",
+    "zuluName": "UHagayi",
+    "chapters": 2,
+    "testament": "OT",
+    "aliases": [
+      "hag",
+      "haggai",
+      "hagayi",
+      "uhagayi"
+    ]
+  },
+  {
+    "id": 38,
+    "code": "ZEC",
+    "name": "Zechariah",
+    "zuluName": "UZakariya",
+    "chapters": 14,
+    "testament": "OT",
+    "aliases": [
+      "zec",
+      "zech",
+      "zechariah",
+      "zakariya",
+      "uzakariya",
+      "zak"
+    ]
+  },
+  {
+    "id": 39,
+    "code": "MAL",
+    "name": "Malachi",
+    "zuluName": "UMalaki",
+    "chapters": 4,
+    "testament": "OT",
+    "aliases": [
+      "mal",
+      "malachi",
+      "malaki",
+      "umalaki"
+    ]
+  },
+  {
+    "id": 40,
+    "code": "MAT",
+    "name": "Matthew",
+    "zuluName": "UMathewu",
+    "chapters": 28,
+    "testament": "NT",
+    "aliases": [
+      "mat",
+      "matt",
+      "matthew",
+      "mathewu",
+      "umathewu"
+    ]
+  },
+  {
+    "id": 41,
+    "code": "MRK",
+    "name": "Mark",
+    "zuluName": "UMarku",
+    "chapters": 16,
+    "testament": "NT",
+    "aliases": [
+      "mrk",
+      "mark",
+      "marku",
+      "umarku"
+    ]
+  },
+  {
+    "id": 42,
+    "code": "LUK",
+    "name": "Luke",
+    "zuluName": "ULuka",
+    "chapters": 24,
+    "testament": "NT",
+    "aliases": [
+      "luk",
+      "luke",
+      "luka",
+      "uluka"
+    ]
+  },
+  {
+    "id": 43,
+    "code": "JHN",
+    "name": "John",
+    "zuluName": "UJohane",
+    "chapters": 21,
+    "testament": "NT",
+    "aliases": [
+      "jhn",
+      "john",
+      "joh",
+      "johane",
+      "ujohane"
+    ]
+  },
+  {
+    "id": 44,
+    "code": "ACT",
+    "name": "Acts",
+    "zuluName": "IzEnzo",
+    "chapters": 28,
+    "testament": "NT",
+    "aliases": [
+      "act",
+      "acts",
+      "izenzo",
+      "zenzo"
+    ]
+  },
+  {
+    "id": 45,
+    "code": "ROM",
+    "name": "Romans",
+    "zuluName": "KwabaseRoma",
+    "chapters": 16,
+    "testament": "NT",
+    "aliases": [
+      "rom",
+      "romans",
+      "amaroma",
+      "kwabaseroma",
+      "roma"
+    ]
+  },
+  {
+    "id": 46,
+    "code": "1CO",
+    "name": "1 Corinthians",
+    "zuluName": "1 KwabaseKorinte",
+    "chapters": 16,
+    "testament": "NT",
+    "aliases": [
+      "1co",
+      "1cor",
+      "1 corinthians",
+      "1 kwabasekorinte",
+      "1korinte",
+      "1kor"
+    ]
+  },
+  {
+    "id": 47,
+    "code": "2CO",
+    "name": "2 Corinthians",
+    "zuluName": "2 KwabaseKorinte",
+    "chapters": 13,
+    "testament": "NT",
+    "aliases": [
+      "2co",
+      "2cor",
+      "2 corinthians",
+      "2 kwabasekorinte",
+      "2korinte",
+      "2kor"
+    ]
+  },
+  {
+    "id": 48,
+    "code": "GAL",
+    "name": "Galatians",
+    "zuluName": "KwabaseGalathiya",
+    "chapters": 6,
+    "testament": "NT",
+    "aliases": [
+      "gal",
+      "galatians",
+      "kwabasegalathiya",
+      "galathiya"
+    ]
+  },
+  {
+    "id": 49,
+    "code": "EPH",
+    "name": "Ephesians",
+    "zuluName": "Kwabase-Efesu",
+    "chapters": 6,
+    "testament": "NT",
+    "aliases": [
+      "eph",
+      "ephesians",
+      "kwabase-efesu",
+      "efesu",
+      "efe"
+    ]
+  },
+  {
+    "id": 50,
+    "code": "PHP",
+    "name": "Philippians",
+    "zuluName": "KwabaseFilipi",
+    "chapters": 4,
+    "testament": "NT",
+    "aliases": [
+      "php",
+      "phil",
+      "philippians",
+      "kwabasefilipi",
+      "filipi",
+      "fil"
+    ]
+  },
+  {
+    "id": 51,
+    "code": "COL",
+    "name": "Colossians",
+    "zuluName": "KwabaseKolose",
+    "chapters": 4,
+    "testament": "NT",
+    "aliases": [
+      "col",
+      "colossians",
+      "kwabasekolose",
+      "kolose",
+      "kol"
+    ]
+  },
+  {
+    "id": 52,
+    "code": "1TH",
+    "name": "1 Thessalonians",
+    "zuluName": "1 KwabaseThesalonika",
+    "chapters": 5,
+    "testament": "NT",
+    "aliases": [
+      "1th",
+      "1thess",
+      "1 thessalonians",
+      "1 thesalonika",
+      "1kwabasethesalonika",
+      "1thes"
+    ]
+  },
+  {
+    "id": 53,
+    "code": "2TH",
+    "name": "2 Thessalonians",
+    "zuluName": "2 KwabaseThesalonika",
+    "chapters": 3,
+    "testament": "NT",
+    "aliases": [
+      "2th",
+      "2thess",
+      "2 thessalonians",
+      "2 thesalonika",
+      "2kwabasethesalonika",
+      "2thes"
+    ]
+  },
+  {
+    "id": 54,
+    "code": "1TI",
+    "name": "1 Timothy",
+    "zuluName": "1 KuThimothewu",
+    "chapters": 6,
+    "testament": "NT",
+    "aliases": [
+      "1ti",
+      "1tim",
+      "1 timothy",
+      "1 kuthimothewu",
+      "1thimothewu",
+      "1timothewu"
+    ]
+  },
+  {
+    "id": 55,
+    "code": "2TI",
+    "name": "2 Timothy",
+    "zuluName": "2 KuThimothewu",
+    "chapters": 4,
+    "testament": "NT",
+    "aliases": [
+      "2ti",
+      "2tim",
+      "2 timothy",
+      "2 kuthimothewu",
+      "2thimothewu",
+      "2timothewu"
+    ]
+  },
+  {
+    "id": 56,
+    "code": "TIT",
+    "name": "Titus",
+    "zuluName": "KuThithu",
+    "chapters": 3,
+    "testament": "NT",
+    "aliases": [
+      "tit",
+      "titus",
+      "kuthithu",
+      "thithu"
+    ]
+  },
+  {
+    "id": 57,
+    "code": "PHM",
+    "name": "Philemon",
+    "zuluName": "KuFilemoni",
+    "chapters": 1,
+    "testament": "NT",
+    "aliases": [
+      "phm",
+      "phlm",
+      "philem",
+      "philemon",
+      "kufilemoni",
+      "filemoni"
+    ]
+  },
+  {
+    "id": 58,
+    "code": "HEB",
+    "name": "Hebrews",
+    "zuluName": "KumaHeberu",
+    "chapters": 13,
+    "testament": "NT",
+    "aliases": [
+      "heb",
+      "hebrews",
+      "kumaheberu",
+      "heberu"
+    ]
+  },
+  {
+    "id": 59,
+    "code": "JAS",
+    "name": "James",
+    "zuluName": "EkaJakobe",
+    "chapters": 5,
+    "testament": "NT",
+    "aliases": [
+      "jas",
+      "james",
+      "ekajakobe",
+      "jakobe",
+      "jak"
+    ]
+  },
+  {
+    "id": 60,
+    "code": "1PE",
+    "name": "1 Peter",
+    "zuluName": "1 EkaPetru",
+    "chapters": 5,
+    "testament": "NT",
+    "aliases": [
+      "1pe",
+      "1pet",
+      "1 peter",
+      "1 ekapetru",
+      "1petru",
+      "1pet"
+    ]
+  },
+  {
+    "id": 61,
+    "code": "2PE",
+    "name": "2 Peter",
+    "zuluName": "2 EkaPetru",
+    "chapters": 3,
+    "testament": "NT",
+    "aliases": [
+      "2pe",
+      "2pet",
+      "2 peter",
+      "2 ekapetru",
+      "2petru",
+      "2pet"
+    ]
+  },
+  {
+    "id": 62,
+    "code": "1JN",
+    "name": "1 John",
+    "zuluName": "1 EkaJohane",
+    "chapters": 5,
+    "testament": "NT",
+    "aliases": [
+      "1jn",
+      "1joh",
+      "1 john",
+      "1 ekajohane",
+      "1johane"
+    ]
+  },
+  {
+    "id": 63,
+    "code": "2JN",
+    "name": "2 John",
+    "zuluName": "2 EkaJohane",
+    "chapters": 1,
+    "testament": "NT",
+    "aliases": [
+      "2jn",
+      "2joh",
+      "2 john",
+      "2 ekajohane",
+      "2johane"
+    ]
+  },
+  {
+    "id": 64,
+    "code": "3JN",
+    "name": "3 John",
+    "zuluName": "3 EkaJohane",
+    "chapters": 1,
+    "testament": "NT",
+    "aliases": [
+      "3jn",
+      "3joh",
+      "3 john",
+      "3 ekajohane",
+      "3johane"
+    ]
+  },
+  {
+    "id": 65,
+    "code": "JUD",
+    "name": "Jude",
+    "zuluName": "EkaJuda",
+    "chapters": 1,
+    "testament": "NT",
+    "aliases": [
+      "jud",
+      "jude",
+      "ekajuda",
+      "juda"
+    ]
+  },
+  {
+    "id": 66,
+    "code": "REV",
+    "name": "Revelation",
+    "zuluName": "IsAmbulo",
+    "chapters": 22,
+    "testament": "NT",
+    "aliases": [
+      "rev",
+      "revelation",
+      "isambulo",
+      "zambulo",
+      "sambulo"
+    ]
+  }
+]

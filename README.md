@@ -1,6 +1,6 @@
 # Daily Bible — Offline & Scripture Status Bar 📖
 
-[![CI](https://github.com/SitholeWB/daily-bible-extension/actions/workflows/ci.yml/badge.svg)](https://github.com/SitholeWB/daily-bible-extension/actions/workflows/ci.yml)
+[![CI](https://github.com/SitholeWB/daily-bread-bible/actions/workflows/ci.yml/badge.svg)](https://github.com/SitholeWB/daily-bread-bible/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/version-1.5.3-blue.svg)](https://marketplace.visualstudio.com)
 [![Offline](https://img.shields.io/badge/network-100%25%20offline%20core-success.svg)](https://github.com)
 [![Translations](https://img.shields.io/badge/translations-60%20languages%20%26%20versions-purple.svg)](https://github.com)
